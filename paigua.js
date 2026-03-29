@@ -1,4 +1,4 @@
-// 六爻排卦引擎
+// 六爻排卦引擎 - 修复版
 class PaiguaEngine {
     constructor() {
         console.log('排卦引擎初始化...');
@@ -6,7 +6,8 @@ class PaiguaEngine {
     
     // 生成完整的排卦结果
     generatePaigua(hexagram) {
-        console.log('开始排卦，传入卦象数据:', hexagram);
+        console.log('=== 开始排卦 ===');
+        console.log('传入卦象数据:', hexagram);
         
         if (!hexagram || !hexagram.benGua) {
             console.error('卦象数据不完整，无法排卦');
@@ -14,7 +15,7 @@ class PaiguaEngine {
         }
         
         // 1. 查找卦象信息
-        const guaData = this.findGuaData(hexagram);
+        const guaData = this.findGuaDataWithChange(hexagram);
         if (!guaData) {
             console.error('无法找到卦象数据');
             return this.createEmptyResult();
@@ -44,64 +45,130 @@ class PaiguaEngine {
         // 4. 为每一爻生成详细信息
         this.generateYaoData(result, hexagram, guaData);
         
+        // 5. 验证结果
+        this.validateResult(result);
+        
         console.log('排卦完成，结果:', result);
         return result;
     }
     
-    // 查找卦象数据
-    findGuaData(hexagram) {
+    // ==================== 修复方案一：增强卦象查找的健壮性 ====================
+    
+    // 主查找函数（增强版）
+    findGuaDataWithChange(hexagram) {
         try {
-            const shangGuaBinary = hexagram.benGua.binary.slice(3, 6).join('');
-            const xiaGuaBinary = hexagram.benGua.binary.slice(0, 3).join('');
+            // 确保二进制数组长度正确
+            const shangGuaBinary = this.ensureBinaryLength(
+                hexagram.benGua.binary.slice(3, 6), 
+                3
+            ).join('');
             
-            console.log('查找卦象:', {
+            const xiaGuaBinary = this.ensureBinaryLength(
+                hexagram.benGua.binary.slice(0, 3), 
+                3
+            ).join('');
+            
+            console.log('查找卦象参数:', {
                 上卦: shangGuaBinary,
                 下卦: xiaGuaBinary,
                 上卦名: hexagram.benGua.shangGua,
-                下卦名: hexagram.benGua.xiaGua
+                下卦名: hexagram.benGua.xiaGua,
+                二进制数组: hexagram.benGua.binary
             });
             
-            const guaData = hexagramDatabase.findHexagram(shangGuaBinary, xiaGuaBinary);
+            // 使用数据库查找
+            let guaData = hexagramDatabase.findHexagram(shangGuaBinary, xiaGuaBinary);
             
+            // 如果查找失败，尝试备用方案
             if (!guaData || !guaData.name || guaData.name === '未知卦') {
-                console.warn('卦象查找失败，尝试备用查找...');
-                return this.findGuaDataFallback(hexagram);
+                console.warn('主查找失败，尝试备用查找...');
+                guaData = this.backupFindGuaData(hexagram);
             }
             
-            return guaData;
+            // 确保返回有效数据
+            return guaData || this.createDefaultGuaData(hexagram);
         } catch (error) {
-            console.error('查找卦象数据时出错:', error);
+            console.error('卦象查找过程中出错:', error);
             return this.createDefaultGuaData(hexagram);
         }
     }
     
-    // 备用卦象查找
-    findGuaDataFallback(hexagram) {
+    // 辅助函数：确保二进制数组长度
+    ensureBinaryLength(binaryArray, expectedLength) {
+        if (!binaryArray || !Array.isArray(binaryArray)) {
+            console.warn(`二进制数组无效，返回默认数组:`, binaryArray);
+            return new Array(expectedLength).fill(0);
+        }
+        
+        if (binaryArray.length === 0) {
+            return new Array(expectedLength).fill(0);
+        }
+        
+        if (binaryArray.length < expectedLength) {
+            // 补全到预期长度
+            const paddedArray = [...binaryArray];
+            while (paddedArray.length < expectedLength) {
+                paddedArray.push(0);
+            }
+            console.warn(`二进制数组长度不足 ${binaryArray.length}/${expectedLength}，已补全`);
+            return paddedArray;
+        }
+        
+        if (binaryArray.length > expectedLength) {
+            // 截取到预期长度
+            console.warn(`二进制数组过长 ${binaryArray.length}/${expectedLength}，已截取`);
+            return binaryArray.slice(0, expectedLength);
+        }
+        
+        return binaryArray;
+    }
+    
+    // 备用查找函数
+    backupFindGuaData(hexagram) {
         const shangGuaName = hexagram.benGua.shangGua;
         const xiaGuaName = hexagram.benGua.xiaGua;
         
-        // 尝试在guaGongData中查找
+        console.log('备用查找参数:', { shangGuaName, xiaGuaName });
+        
+        // 方法1：遍历所有卦象，查找名称匹配的
         for (const [binary, data] of Object.entries(hexagramDatabase.guaGongData)) {
-            if (data.name.includes(shangGuaName) && data.name.includes(xiaGuaName)) {
-                console.log('备用查找成功:', data);
+            if (data.name && data.name.includes(shangGuaName) && data.name.includes(xiaGuaName)) {
+                console.log('备用查找成功（遍历法）:', data);
                 return data;
             }
         }
         
+        // 方法2：尝试组合卦名查找
+        const possibleName1 = `${shangGuaName}${xiaGuaName}`;
+        const possibleName2 = `${shangGuaName}为${xiaGuaName}`;
+        const possibleName3 = `${shangGuaName}上${xiaGuaName}下`;
+        
+        for (const [binary, data] of Object.entries(hexagramDatabase.guaGongData)) {
+            if (data.name === possibleName1 || 
+                data.name === possibleName2 || 
+                data.name === possibleName3) {
+                console.log('备用查找成功（组合名法）:', data);
+                return data;
+            }
+        }
+        
+        console.warn('所有备用查找方法都失败，使用默认卦象数据');
         return this.createDefaultGuaData(hexagram);
     }
     
     // 创建默认卦象数据
     createDefaultGuaData(hexagram) {
         return {
-            name: `${hexagram.benGua.shangGua}上${hexagram.benGua.xiaGua}下`,
+            name: `${hexagram.benGua.shangGua || '未知'}上${hexagram.benGua.xiaGua || '未知'}下`,
             number: 0,
-            guaGong: '乾',
+            guaGong: hexagram.benGua.shangGua || '乾',
             shiWei: 1,
             yingWei: 4,
-            wuXing: '金'
+            wuXing: hexagramDatabase.naJiaMap[hexagram.benGua.shangGua]?.wuXing || '金'
         };
     }
+    
+    // ==================== 基础数据获取函数 ====================
     
     // 获取日期信息
     getDateInfo(date) {
@@ -136,7 +203,6 @@ class PaiguaEngine {
         const solarMonth = date.getMonth() + 1;
         const solarDay = date.getDate();
         
-        // 简化：直接使用公历月份作为农历月份
         const lunarMonths = [
             '正月', '二月', '三月', '四月', '五月', '六月',
             '七月', '八月', '九月', '十月', '冬月', '腊月'
@@ -175,13 +241,18 @@ class PaiguaEngine {
     
     // 获取地支五行
     getDiZhiWuXing(diZhi) {
-        if (!diZhi || diZhi.length < 1) {
-            console.warn('地支字符串为空:', diZhi);
+        if (!diZhi || typeof diZhi !== 'string') {
+            console.warn('地支参数无效:', diZhi);
             return '未知';
         }
         
         // 提取地支字符（处理"甲子"这样的字符串）
         const diZhiChar = diZhi.length > 1 ? diZhi.charAt(1) : diZhi.charAt(0);
+        
+        if (!diZhiChar) {
+            console.warn(`无法从地支字符串"${diZhi}"中提取字符`);
+            return '未知';
+        }
         
         const wuXing = hexagramDatabase.diZhiWuXing[diZhiChar];
         if (!wuXing) {
@@ -210,36 +281,73 @@ class PaiguaEngine {
         return gan[(year - 4) % 10] || '甲';
     }
     
+    // ==================== 修复方案二：增强爻数据生成的健壮性 ====================
+    
     // 生成爻数据
     generateYaoData(result, hexagram, guaData) {
         const yaoCount = 6;
+        result.yaoData = []; // 先清空，防止重复
+        
+        console.log('开始生成爻数据，卦象信息:', {
+            卦名: guaData.name,
+            卦宫: guaData.guaGong,
+            五行: guaData.wuXing
+        });
         
         for (let i = 0; i < yaoCount; i++) {
             try {
-                const yaoPosition = i + 1; // 1=初爻, 6=上爻
+                const yaoPosition = i + 1;
+                
+                // 验证 hexagram.benGua.binary 存在且长度足够
+                if (!hexagram.benGua.binary || !Array.isArray(hexagram.benGua.binary)) {
+                    console.error(`hexagram.benGua.binary 数据异常，位置 ${i}`);
+                    result.yaoData.push(this.createSafeYaoData(yaoPosition, i, result, hexagram));
+                    continue;
+                }
+                
+                // 确保二进制数组长度
+                const binaryArray = this.ensureBinaryLength(hexagram.benGua.binary, 6);
+                
                 const yaoData = this.generateSingleYaoData(
                     yaoPosition, 
                     i, 
+                    binaryArray,
                     hexagram, 
                     guaData, 
                     result
                 );
                 
                 result.yaoData.push(yaoData);
+                
+                console.log(`第${yaoPosition}爻生成完成:`, {
+                    位置: yaoData.positionName,
+                    地支: yaoData.dizhi,
+                    六亲: yaoData.liuQin,
+                    是否动爻: yaoData.isChanging
+                });
             } catch (error) {
                 console.error(`生成第${i + 1}爻数据时出错:`, error);
-                result.yaoData.push(this.createEmptyYaoData(i + 1));
+                result.yaoData.push(this.createSafeYaoData(i + 1, i, result, hexagram));
             }
         }
+        
+        // 验证生成的数据
+        this.validateYaoData(result.yaoData);
     }
     
     // 生成单个爻数据
-    generateSingleYaoData(position, index, hexagram, guaData, result) {
+    generateSingleYaoData(position, index, binaryArray, hexagram, guaData, result) {
         // 爻的基本信息
         const yaoPosition = position;
         const isNeiGua = index < 3; // 0-2为内卦，3-5为外卦
-        const isYang = hexagram.benGua.binary[5 - index] === 1;
-        const isChanging = result.changingYaos.includes(position);
+        
+        // 注意：二进制数组是从上爻开始的，所以需要倒序
+        const binaryIndex = 5 - index; // 0=上爻, 5=初爻
+        const isYang = binaryArray[binaryIndex] === 1;
+        
+        const isChanging = result.changingYaos && 
+                          Array.isArray(result.changingYaos) && 
+                          result.changingYaos.includes(position);
         
         // 1. 获取纳甲地支
         const dizhi = this.getNaJiaDiZhi(position, isNeiGua, guaData);
@@ -283,11 +391,17 @@ class PaiguaEngine {
     getNaJiaDiZhi(position, isNeiGua, guaData) {
         try {
             const guaGong = guaData.guaGong;
+            
+            if (!guaGong || !hexagramDatabase.naJiaMap[guaGong]) {
+                console.warn(`卦宫"${guaGong}"不在纳甲映射表中`);
+                return this.getDefaultDiZhi(position, isNeiGua);
+            }
+            
             const yaoIndex = isNeiGua ? (position - 1) : (position - 4);
             
             if (yaoIndex < 0 || yaoIndex > 2) {
                 console.warn(`爻位索引错误: position=${position}, isNeiGua=${isNeiGua}, yaoIndex=${yaoIndex}`);
-                return '未知';
+                return this.getDefaultDiZhi(position, isNeiGua);
             }
             
             const dizhi = hexagramDatabase.getNaJiaDiZhi(guaGong, isNeiGua, yaoIndex);
@@ -306,19 +420,21 @@ class PaiguaEngine {
     
     // 获取默认地支
     getDefaultDiZhi(position, isNeiGua) {
-        const defaultDiZhi = {
+        const defaultDiZhiMap = {
             1: '子', 2: '丑', 3: '寅',
             4: '卯', 5: '辰', 6: '巳'
         };
         
-        return isNeiGua ? 
-            `甲${defaultDiZhi[position]}` : 
-            `壬${defaultDiZhi[position]}`;
+        const diZhiChar = defaultDiZhiMap[position] || '子';
+        const tianGan = isNeiGua ? '甲' : '壬';
+        
+        return `${tianGan}${diZhiChar}`;
     }
     
     // 提取地支字符
     extractDiZhiChar(dizhi) {
-        if (!dizhi || dizhi === '未知') {
+        if (!dizhi || typeof dizhi !== 'string') {
+            console.warn('地支字符串无效:', dizhi);
             return '子';
         }
         
@@ -333,7 +449,9 @@ class PaiguaEngine {
     // 定六亲
     getLiuQin(guaWuXing, yaoWuXing) {
         try {
-            if (!guaWuXing || !yaoWuXing || guaWuXing === '未知' || yaoWuXing === '未知') {
+            if (!guaWuXing || !yaoWuXing || 
+                guaWuXing === '未知' || yaoWuXing === '未知') {
+                console.warn('五行参数无效:', { guaWuXing, yaoWuXing });
                 return '未知';
             }
             
@@ -431,6 +549,83 @@ class PaiguaEngine {
         return '平';
     }
     
+    // ==================== 修复方案三：数据验证和错误处理 ====================
+    
+    // 创建安全的爻数据（兜底函数）
+    createSafeYaoData(position, index, result, hexagram) {
+        const isNeiGua = index < 3;
+        const binaryArray = hexagram && hexagram.benGua && hexagram.benGua.binary ? 
+                           this.ensureBinaryLength(hexagram.benGua.binary, 6) : 
+                           [0, 0, 0, 0, 0, 0];
+        
+        const binaryIndex = 5 - index;
+        const isYang = binaryArray[binaryIndex] === 1;
+        const isChanging = result.changingYaos && 
+                          Array.isArray(result.changingYaos) && 
+                          result.changingYaos.includes(position);
+        
+        return {
+            position: position,
+            positionName: this.getYaoPositionName(position),
+            isYang: isYang,
+            symbol: this.getYaoSymbol(isYang, isChanging),
+            dizhi: this.getDefaultDiZhi(position, isNeiGua),
+            diZhiChar: '子',
+            diZhiWuXing: '水',
+            liuQin: '未知',
+            shiYing: '',
+            liuShen: result.liuShen[index] || '未知',
+            wangShuai: { overall: '平' },
+            isChanging: isChanging,
+            isNeiGua: isNeiGua
+        };
+    }
+    
+    // 验证爻数据
+    validateYaoData(yaoData) {
+        if (!yaoData || !Array.isArray(yaoData)) {
+            console.error('爻数据无效:', yaoData);
+            return false;
+        }
+        
+        if (yaoData.length !== 6) {
+            console.error(`爻数据数量异常: ${yaoData.length}/6`);
+            return false;
+        }
+        
+        let validCount = 0;
+        for (let i = 0; i < yaoData.length; i++) {
+            const yao = yaoData[i];
+            if (yao && yao.positionName && yao.dizhi) {
+                validCount++;
+            } else {
+                console.warn(`第${i + 1}爻数据不完整:`, yao);
+            }
+        }
+        
+        console.log(`爻数据验证: ${validCount}/6 条有效`);
+        return validCount === 6;
+    }
+    
+    // 验证整个排卦结果
+    validateResult(result) {
+        if (!result) {
+            console.error('排卦结果为空');
+            return false;
+        }
+        
+        if (!result.yaoData || result.yaoData.length !== 6) {
+            console.error(`爻数据数量异常: ${result.yaoData ? result.yaoData.length : 0}/6`);
+            return false;
+        }
+        
+        if (!result.guaInfo || !result.guaInfo.name) {
+            console.warn('卦象信息不完整');
+        }
+        
+        return true;
+    }
+    
     // 创建空的排卦结果
     createEmptyResult() {
         return {
@@ -453,51 +648,6 @@ class PaiguaEngine {
             liuShen: ['未知', '未知', '未知', '未知', '未知', '未知'],
             changingYaos: []
         };
-    }
-    
-    // 创建空的爻数据
-    createEmptyYaoData(position) {
-        return {
-            position: position,
-            positionName: this.getYaoPositionName(position),
-            isYang: false,
-            symbol: '未知',
-            dizhi: '未知',
-            diZhiChar: '子',
-            diZhiWuXing: '未知',
-            liuQin: '未知',
-            shiYing: '',
-            liuShen: '未知',
-            wangShuai: { overall: '平' },
-            isChanging: false,
-            isNeiGua: position <= 3
-        };
-    }
-    
-    // 数据验证
-    validateResult(result) {
-        if (!result) {
-            console.error('排卦结果为空');
-            return false;
-        }
-        
-        if (!result.yaoData || result.yaoData.length !== 6) {
-            console.error('爻数据不完整，数量:', result.yaoData?.length);
-            return false;
-        }
-        
-        // 检查每个爻的关键数据
-        for (let i = 0; i < result.yaoData.length; i++) {
-            const yao = result.yaoData[i];
-            if (!yao.dizhi || yao.dizhi === '未知') {
-                console.warn(`第${i + 1}爻地支数据缺失`);
-            }
-            if (!yao.liuQin || yao.liuQin === '未知') {
-                console.warn(`第${i + 1}爻六亲数据缺失`);
-            }
-        }
-        
-        return true;
     }
 }
 
