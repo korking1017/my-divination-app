@@ -1,0 +1,558 @@
+:root {
+    --primary: #8B4513;
+    --primary-dark: #5D2906;
+    --secondary: #D2691E;
+    --light: #FAEBD7;
+    --dark: #2C1810;
+    --yang: #FF6B35;
+    --yin: #4A90E2;
+    --gray: #666;
+    --light-gray: #f0f0f0;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    color: var(--dark);
+    line-height: 1.6;
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.container {
+    max-width: 100%;
+    min-height: 100vh;
+    padding: 20px 15px 80px;
+    margin: 0 auto;
+}
+
+/* 头部样式 */
+.app-header {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--primary);
+}
+
+.app-header h1 {
+    font-size: 1.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+}
+
+.yin, .yang {
+    font-size: 1.5rem;
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.date-display {
+    font-size: 0.9rem;
+    color: var(--gray);
+    background: var(--light);
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    border: 1px solid #ddd;
+}
+
+/* 铜钱抛掷区 */
+.coin-section {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(139, 69, 19, 0.1);
+}
+
+.coin-section h2 {
+    text-align: center;
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.coin-display {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--light);
+    border-radius: 15px;
+    border: 2px dashed var(--secondary);
+}
+
+.coin-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.coin {
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle at 30% 30%, #FFD700, #B8860B);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #8B4513;
+    box-shadow: 0 6px 12px rgba(139, 69, 19, 0.3);
+    border: 4px solid #DAA520;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.coin.tossing {
+    animation: toss 0.8s ease-in-out;
+}
+
+@keyframes toss {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-30px) rotate(90deg); }
+    50% { transform: translateY(0) rotate(180deg); }
+    75% { transform: translateY(-15px) rotate(270deg); }
+}
+
+.coin-result {
+    font-size: 1.2rem;
+    color: var(--primary-dark);
+    font-weight: bold;
+    min-height: 30px;
+}
+
+/* 按钮样式 */
+.controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-toss, .btn-reset {
+    flex: 1;
+    padding: 18px 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-toss {
+    background: linear-gradient(135deg, var(--yang), #FF8C42);
+    color: white;
+    box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+}
+
+.btn-toss:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+}
+
+.btn-reset {
+    background: linear-gradient(135deg, var(--yin), #6BA4E2);
+    color: white;
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+}
+
+.btn-reset:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+}
+
+.btn-toss:disabled, .btn-reset:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* 进度条 */
+.progress {
+    margin-top: 20px;
+}
+
+.progress-bar {
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--yang), var(--yin));
+    width: 16.66%; /* 1/6 */
+    border-radius: 5px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    text-align: center;
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+/* 卦象显示 */
+.hexagram-section, .paigua-section, .interpretation-section, .history-section {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(139, 69, 19, 0.1);
+}
+
+.hexagram-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.hexagram-box {
+    background: var(--light);
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid var(--secondary);
+}
+
+.hexagram-box h3 {
+    text-align: center;
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.hexagram-display {
+    margin: 20px auto;
+    max-width: 300px;
+}
+
+.yao-line {
+    height: 8px;
+    margin: 12px 0;
+    border-radius: 4px;
+    position: relative;
+}
+
+.yao-yang {
+    background: var(--yang);
+    width: 100%;
+}
+
+.yao-yin {
+    background: var(--yin);
+    width: 100%;
+}
+
+.yao-yin:before, .yao-yin:after {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 40%;
+    background: var(--light);
+    border-radius: 4px;
+}
+
+.yao-yin:before { left: 10%; }
+.yao-yin:after { right: 10%; }
+
+.yao-changing {
+    position: relative;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.changing-yaos {
+    text-align: center;
+    color: var(--yang);
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-top: 20px;
+}
+
+/* 排卦表格 */
+.paigua-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.paigua-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.paigua-table th {
+    background: var(--primary);
+    color: white;
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+}
+
+.paigua-table td {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.paigua-table tr:nth-child(even) {
+    background: rgba(139, 69, 19, 0.05);
+}
+
+/* 解卦部分 */
+.question-type {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.question-type select {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px 20px;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: white;
+    color: var(--dark);
+    margin-top: 10px;
+}
+
+.interpretation-content {
+    background: var(--light);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #ddd;
+}
+
+.interpretation-item {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.interpretation-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.interpretation-item h4 {
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.interpretation-item p {
+    line-height: 1.8;
+    color: var(--dark);
+}
+
+/* 历史记录 */
+.history-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: var(--light);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-item:hover {
+    transform: translateX(5px);
+    border-color: var(--primary);
+}
+
+.history-item-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-bottom: 5px;
+}
+
+.history-item-gua {
+    font-weight: bold;
+    color: var(--primary-dark);
+}
+
+/* 底部导航 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 12px 5px;
+    border: none;
+    background: none;
+    font-size: 0.85rem;
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-btn.active {
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.nav-btn.active:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    right: 25%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* 安装提示 */
+.install-prompt {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    right: 20px;
+    background: var(--primary-dark);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 2000;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.install-prompt p {
+    flex: 1;
+    margin-right: 15px;
+    font-size: 0.9rem;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 5px;
+    line-height: 1;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px 10px 80px;
+    }
+    
+    .coin {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+    }
+    
+    .coin-row {
+        gap: 20px;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    .hexagram-box {
+        padding: 15px;
+    }
+    
+    .paigua-table {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .app-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .coin {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #e0e0e0;
+    }
+    
+    .coin-section, .hexagram-section, 
+    .paigua-section, .interpretation-section,
+    .history-section {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+    
+    .coin-display, .hexagram-box, .interpretation-content {
+        background: #3a3a3a;
+    }
+    
+    .bottom-nav {
+        background: #2d2d2d;
+        border-top-color: #444;
+    }
+    
+    .nav-btn {
+        color: #aaa;
+    }
+    
+    .nav-btn.active {
+        color: var(--secondary);
+    }
+}
