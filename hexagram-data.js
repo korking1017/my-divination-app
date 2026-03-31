@@ -1,577 +1,220 @@
-// 六爻算卦数据库
+// 六爻算卦数据库 - 完整版
+// 二进制编码规则：6位字符串，索引0=初爻，索引5=上爻
+// 上下卦划分：下卦=索引0-2（初爻到三爻），上卦=索引3-5（四爻到上爻）
+
 const hexagramDatabase = {
-    // 八卦基本定义
+    // ==================== 八卦定义 ====================
     bagua: {
-        '111': { name: '乾', symbol: '☰', wuXing: '金', nature: '天' },
-        '000': { name: '坤', symbol: '☷', wuXing: '土', nature: '地' },
-        '100': { name: '震', symbol: '☳', wuXing: '木', nature: '雷' },
-        '010': { name: '坎', symbol: '☵', wuXing: '水', nature: '水' },
-        '001': { name: '艮', symbol: '☶', wuXing: '土', nature: '山' },
-        '110': { name: '巽', symbol: '☴', wuXing: '木', nature: '风' },
-        '101': { name: '离', symbol: '☲', wuXing: '火', nature: '火' },
-        '011': { name: '兑', symbol: '☱', wuXing: '金', nature: '泽' }
+        '111': { name: '乾', symbol: '☰', wuXing: '金', nature: '天', direction: '西北' },
+        '000': { name: '坤', symbol: '☷', wuXing: '土', nature: '地', direction: '西南' },
+        '100': { name: '震', symbol: '☳', wuXing: '木', nature: '雷', direction: '东' },
+        '010': { name: '坎', symbol: '☵', wuXing: '水', nature: '水', direction: '北' },
+        '001': { name: '艮', symbol: '☶', wuXing: '土', nature: '山', direction: '东北' },
+        '110': { name: '巽', symbol: '☴', wuXing: '木', nature: '风', direction: '东南' },
+        '101': { name: '离', symbol: '☲', wuXing: '火', nature: '火', direction: '南' },
+        '011': { name: '兑', symbol: '☱', wuXing: '金', nature: '泽', direction: '西' }
     },
     
-    // 八宫六十四卦世应表（完整版）
+    // ==================== 六十四卦数据 ====================
     guaGongData: {
-        // 乾宫八卦（属金）
+        // 乾宫八卦 (五行:金)
         '111111': { name: '乾为天', number: 1, guaGong: '乾', shiWei: 6, yingWei: 3, wuXing: '金' },
         '011111': { name: '天风姤', number: 44, guaGong: '乾', shiWei: 1, yingWei: 4, wuXing: '金' },
         '001111': { name: '天山遁', number: 33, guaGong: '乾', shiWei: 2, yingWei: 5, wuXing: '金' },
         '000111': { name: '天地否', number: 12, guaGong: '乾', shiWei: 3, yingWei: 6, wuXing: '金' },
         '000011': { name: '风地观', number: 20, guaGong: '乾', shiWei: 4, yingWei: 1, wuXing: '金' },
         '000001': { name: '山地剥', number: 23, guaGong: '乾', shiWei: 5, yingWei: 2, wuXing: '金' },
-        '100001': { name: '火地晋', number: 35, guaGong: '乾', shiWei: 4, yingWei: 1, wuXing: '金' },
-        '100111': { name: '火天大有', number: 14, guaGong: '乾', shiWei: 3, yingWei: 6, wuXing: '金' },
+        '000101': { name: '火地晋', number: 35, guaGong: '乾', shiWei: 4, yingWei: 1, wuXing: '金' },
+        '111101': { name: '火天大有', number: 14, guaGong: '乾', shiWei: 3, yingWei: 6, wuXing: '金' },
         
-        // 坤宫八卦（属土）
+        // 坤宫八卦 (五行:土)
         '000000': { name: '坤为地', number: 2, guaGong: '坤', shiWei: 6, yingWei: 3, wuXing: '土' },
         '100000': { name: '地雷复', number: 24, guaGong: '坤', shiWei: 1, yingWei: 4, wuXing: '土' },
         '110000': { name: '地泽临', number: 19, guaGong: '坤', shiWei: 2, yingWei: 5, wuXing: '土' },
         '111000': { name: '地天泰', number: 11, guaGong: '坤', shiWei: 3, yingWei: 6, wuXing: '土' },
         '111100': { name: '雷天大壮', number: 34, guaGong: '坤', shiWei: 4, yingWei: 1, wuXing: '土' },
         '111110': { name: '泽天夬', number: 43, guaGong: '坤', shiWei: 5, yingWei: 2, wuXing: '土' },
-        '011110': { name: '水天需', number: 5, guaGong: '坤', shiWei: 4, yingWei: 1, wuXing: '土' },
-        '011000': { name: '水地比', number: 8, guaGong: '坤', shiWei: 3, yingWei: 6, wuXing: '土' },
+        '111010': { name: '水天需', number: 5, guaGong: '坤', shiWei: 4, yingWei: 1, wuXing: '土' },  // 二进制: 111010
+        '000010': { name: '水地比', number: 8, guaGong: '坤', shiWei: 3, yingWei: 6, wuXing: '土' },   // 二进制: 000010
         
-        // 震宫八卦（属木）
+        // 震宫八卦 (五行:木)
         '100100': { name: '震为雷', number: 51, guaGong: '震', shiWei: 6, yingWei: 3, wuXing: '木' },
         '000100': { name: '雷地豫', number: 16, guaGong: '震', shiWei: 1, yingWei: 4, wuXing: '木' },
         '010100': { name: '雷水解', number: 40, guaGong: '震', shiWei: 2, yingWei: 5, wuXing: '木' },
         '011100': { name: '雷风恒', number: 32, guaGong: '震', shiWei: 3, yingWei: 6, wuXing: '木' },
         '011000': { name: '地风升', number: 46, guaGong: '震', shiWei: 4, yingWei: 1, wuXing: '木' },
-        '001000': { name: '水风井', number: 48, guaGong: '震', shiWei: 5, yingWei: 2, wuXing: '木' },
-        '101000': { name: '泽风大过', number: 28, guaGong: '震', shiWei: 4, yingWei: 1, wuXing: '木' },
-        '101100': { name: '泽雷随', number: 17, guaGong: '震', shiWei: 3, yingWei: 6, wuXing: '木' },
+        '011010': { name: '水风井', number: 48, guaGong: '震', shiWei: 5, yingWei: 2, wuXing: '木' },
+        '011110': { name: '泽风大过', number: 28, guaGong: '震', shiWei: 4, yingWei: 1, wuXing: '木' },
+        '100110': { name: '泽雷随', number: 17, guaGong: '震', shiWei: 3, yingWei: 6, wuXing: '木' },
         
-        // 巽宫八卦（属木）
-        '110110': { name: '巽为风', number: 57, guaGong: '巽', shiWei: 6, yingWei: 3, wuXing: '木' },
-        '010110': { name: '风天小畜', number: 9, guaGong: '巽', shiWei: 1, yingWei: 4, wuXing: '木' },
-        '000110': { name: '风火家人', number: 37, guaGong: '巽', shiWei: 2, yingWei: 5, wuXing: '木' },
-        '001110': { name: '风雷益', number: 42, guaGong: '巽', shiWei: 3, yingWei: 6, wuXing: '木' },
-        '001010': { name: '天雷无妄', number: 25, guaGong: '巽', shiWei: 4, yingWei: 1, wuXing: '木' },
-        '011010': { name: '火雷噬嗑', number: 21, guaGong: '巽', shiWei: 5, yingWei: 2, wuXing: '木' },
-        '111010': { name: '山雷颐', number: 27, guaGong: '巽', shiWei: 4, yingWei: 1, wuXing: '木' },
-        '111110': { name: '山风蛊', number: 18, guaGong: '巽', shiWei: 3, yingWei: 6, wuXing: '木' },
+        // 巽宫八卦 (五行:木)
+        '011011': { name: '巽为风', number: 57, guaGong: '巽', shiWei: 6, yingWei: 3, wuXing: '木' },
+        '111011': { name: '风天小畜', number: 9, guaGong: '巽', shiWei: 1, yingWei: 4, wuXing: '木' },
+        '101011': { name: '风火家人', number: 37, guaGong: '巽', shiWei: 2, yingWei: 5, wuXing: '木' },
+        '100011': { name: '风雷益', number: 42, guaGong: '巽', shiWei: 3, yingWei: 6, wuXing: '木' },
+        '100111': { name: '天雷无妄', number: 25, guaGong: '巽', shiWei: 4, yingWei: 1, wuXing: '木' },
+        '100101': { name: '火雷噬嗑', number: 21, guaGong: '巽', shiWei: 5, yingWei: 2, wuXing: '木' },
+        '100001': { name: '山雷颐', number: 27, guaGong: '巽', shiWei: 4, yingWei: 1, wuXing: '木' },
+        '011001': { name: '山风蛊', number: 18, guaGong: '巽', shiWei: 3, yingWei: 6, wuXing: '木' },
         
-        // 坎宫八卦（属水）
+        // 坎宫八卦 (五行:水)
         '010010': { name: '坎为水', number: 29, guaGong: '坎', shiWei: 6, yingWei: 3, wuXing: '水' },
         '110010': { name: '水泽节', number: 60, guaGong: '坎', shiWei: 1, yingWei: 4, wuXing: '水' },
-        '100010': { name: '水雷屯', number: 3, guaGong: '坎', shiWei: 2, yingWei: 5, wuXing: '水' },
+        '100100': { name: '水雷屯', number: 3, guaGong: '坎', shiWei: 2, yingWei: 5, wuXing: '水' },   // 二进制: 100010
         '101010': { name: '水火既济', number: 63, guaGong: '坎', shiWei: 3, yingWei: 6, wuXing: '水' },
         '101110': { name: '泽火革', number: 49, guaGong: '坎', shiWei: 4, yingWei: 1, wuXing: '水' },
-        '111110': { name: '雷火丰', number: 55, guaGong: '坎', shiWei: 5, yingWei: 2, wuXing: '水' },
-        '011110': { name: '地火明夷', number: 36, guaGong: '坎', shiWei: 4, yingWei: 1, wuXing: '水' },
-        '011010': { name: '地水师', number: 7, guaGong: '坎', shiWei: 3, yingWei: 6, wuXing: '水' },
+        '101100': { name: '雷火丰', number: 55, guaGong: '坎', shiWei: 5, yingWei: 2, wuXing: '水' },
+        '101000': { name: '地火明夷', number: 36, guaGong: '坎', shiWei: 4, yingWei: 1, wuXing: '水' },
+        '010000': { name: '地水师', number: 7, guaGong: '坎', shiWei: 3, yingWei: 6, wuXing: '水' },    // 二进制: 000010
         
-        // 离宫八卦（属火）
+        // 离宫八卦 (五行:火)
         '101101': { name: '离为火', number: 30, guaGong: '离', shiWei: 6, yingWei: 3, wuXing: '火' },
         '001101': { name: '火山旅', number: 56, guaGong: '离', shiWei: 1, yingWei: 4, wuXing: '火' },
         '011101': { name: '火风鼎', number: 50, guaGong: '离', shiWei: 2, yingWei: 5, wuXing: '火' },
         '010101': { name: '火水未济', number: 64, guaGong: '离', shiWei: 3, yingWei: 6, wuXing: '火' },
         '010001': { name: '山水蒙', number: 4, guaGong: '离', shiWei: 4, yingWei: 1, wuXing: '火' },
-        '000001': { name: '风水涣', number: 59, guaGong: '离', shiWei: 5, yingWei: 2, wuXing: '火' },
-        '100001': { name: '天水讼', number: 6, guaGong: '离', shiWei: 4, yingWei: 1, wuXing: '火' },
-        '100101': { name: '天火同人', number: 13, guaGong: '离', shiWei: 3, yingWei: 6, wuXing: '火' },
+        '010011': { name: '风水涣', number: 59, guaGong: '离', shiWei: 5, yingWei: 2, wuXing: '火' },
+        '010111': { name: '天水讼', number: 6, guaGong: '离', shiWei: 4, yingWei: 1, wuXing: '火' },   // 二进制: 111010
+        '101111': { name: '天火同人', number: 13, guaGong: '离', shiWei: 3, yingWei: 6, wuXing: '火' },
         
-        // 艮宫八卦（属土）
+        // 艮宫八卦 (五行:土)
         '001001': { name: '艮为山', number: 52, guaGong: '艮', shiWei: 6, yingWei: 3, wuXing: '土' },
         '101001': { name: '山火贲', number: 22, guaGong: '艮', shiWei: 1, yingWei: 4, wuXing: '土' },
         '111001': { name: '山天大畜', number: 26, guaGong: '艮', shiWei: 2, yingWei: 5, wuXing: '土' },
         '110001': { name: '山泽损', number: 41, guaGong: '艮', shiWei: 3, yingWei: 6, wuXing: '土' },
         '110101': { name: '火泽睽', number: 38, guaGong: '艮', shiWei: 4, yingWei: 1, wuXing: '土' },
-        '100101': { name: '天泽履', number: 10, guaGong: '艮', shiWei: 5, yingWei: 2, wuXing: '土' },
-        '000101': { name: '风泽中孚', number: 61, guaGong: '艮', shiWei: 4, yingWei: 1, wuXing: '土' },
-        '000001': { name: '风山渐', number: 53, guaGong: '艮', shiWei: 3, yingWei: 6, wuXing: '土' },
+        '110111': { name: '天泽履', number: 10, guaGong: '艮', shiWei: 5, yingWei: 2, wuXing: '土' },
+        '110011': { name: '风泽中孚', number: 61, guaGong: '艮', shiWei: 4, yingWei: 1, wuXing: '土' },
+        '001011': { name: '风山渐', number: 53, guaGong: '艮', shiWei: 3, yingWei: 6, wuXing: '土' },
         
-        // 兑宫八卦（属金）
-        '011011': { name: '兑为泽', number: 58, guaGong: '兑', shiWei: 6, yingWei: 3, wuXing: '金' },
-        '111011': { name: '泽水困', number: 47, guaGong: '兑', shiWei: 1, yingWei: 4, wuXing: '金' },
-        '101011': { name: '泽地萃', number: 45, guaGong: '兑', shiWei: 2, yingWei: 5, wuXing: '金' },
-        '100011': { name: '泽山咸', number: 31, guaGong: '兑', shiWei: 3, yingWei: 6, wuXing: '金' },
-        '100111': { name: '水山蹇', number: 39, guaGong: '兑', shiWei: 4, yingWei: 1, wuXing: '金' },
-        '110111': { name: '地山谦', number: 15, guaGong: '兑', shiWei: 5, yingWei: 2, wuXing: '金' },
-        '010111': { name: '雷山小过', number: 62, guaGong: '兑', shiWei: 4, yingWei: 1, wuXing: '金' },
-        '010011': { name: '雷泽归妹', number: 54, guaGong: '兑', shiWei: 3, yingWei: 6, wuXing: '金' }
+        // 兑宫八卦 (五行:金)
+        '110110': { name: '兑为泽', number: 58, guaGong: '兑', shiWei: 6, yingWei: 3, wuXing: '金' },
+        '010110': { name: '泽水困', number: 47, guaGong: '兑', shiWei: 1, yingWei: 4, wuXing: '金' },
+        '000110': { name: '泽地萃', number: 45, guaGong: '兑', shiWei: 2, yingWei: 5, wuXing: '金' },
+        '001110': { name: '泽山咸', number: 31, guaGong: '兑', shiWei: 3, yingWei: 6, wuXing: '金' }, // 二进制: 110100
+        '001010': { name: '水山蹇', number: 39, guaGong: '兑', shiWei: 4, yingWei: 1, wuXing: '金' },
+        '001000': { name: '地山谦', number: 15, guaGong: '兑', shiWei: 5, yingWei: 2, wuXing: '金' },
+        '001100': { name: '雷山小过', number: 62, guaGong: '兑', shiWei: 4, yingWei: 1, wuXing: '金' },
+        '110100': { name: '雷泽归妹', number: 54, guaGong: '兑', shiWei: 3, yingWei: 6, wuXing: '金' }
     },
     
-    // 纳甲装地支数据库（完整版）
+    // ==================== 纳甲装地支 ====================
     naJiaMap: {
-        '乾': { 
-            neiGua: ['甲子', '甲寅', '甲辰'], 
-            waiGua: ['壬午', '壬申', '壬戌'],
-            wuXing: '金',
-            direction: '西北'
-        },
-        '坤': { 
-            neiGua: ['乙未', '乙巳', '乙卯'], 
-            waiGua: ['癸丑', '癸亥', '癸酉'],
-            wuXing: '土',
-            direction: '西南'
-        },
-        '震': { 
-            neiGua: ['庚子', '庚寅', '庚辰'], 
-            waiGua: ['庚午', '庚申', '庚戌'],
-            wuXing: '木',
-            direction: '东'
-        },
-        '巽': { 
-            neiGua: ['辛丑', '辛亥', '辛酉'], 
-            waiGua: ['辛未', '辛巳', '辛卯'],
-            wuXing: '木',
-            direction: '东南'
-        },
-        '坎': { 
-            neiGua: ['戊寅', '戊辰', '戊午'], 
-            waiGua: ['戊申', '戊戌', '戊子'],
-            wuXing: '水',
-            direction: '北'
-        },
-        '离': { 
-            neiGua: ['己卯', '己丑', '己亥'], 
-            waiGua: ['己酉', '己未', '己巳'],
-            wuXing: '火',
-            direction: '南'
-        },
-        '艮': { 
-            neiGua: ['丙辰', '丙午', '丙申'], 
-            waiGua: ['丙戌', '丙子', '丙寅'],
-            wuXing: '土',
-            direction: '东北'
-        },
-        '兑': { 
-            neiGua: ['丁巳', '丁卯', '丁丑'], 
-            waiGua: ['丁亥', '丁酉', '丁未'],
-            wuXing: '金',
-            direction: '西'
-        }
+        '乾': { neiGua: ['甲子', '甲寅', '甲辰'], waiGua: ['壬午', '壬申', '壬戌'], wuXing: '金', direction: '西北' },
+        '坤': { neiGua: ['乙未', '乙巳', '乙卯'], waiGua: ['癸丑', '癸亥', '癸酉'], wuXing: '土', direction: '西南' },
+        '震': { neiGua: ['庚子', '庚寅', '庚辰'], waiGua: ['庚午', '庚申', '庚戌'], wuXing: '木', direction: '东' },
+        '巽': { neiGua: ['辛丑', '辛亥', '辛酉'], waiGua: ['辛未', '辛巳', '辛卯'], wuXing: '木', direction: '东南' },
+        '坎': { neiGua: ['戊寅', '戊辰', '戊午'], waiGua: ['戊申', '戊戌', '戊子'], wuXing: '水', direction: '北' },
+        '离': { neiGua: ['己卯', '己丑', '己亥'], waiGua: ['己酉', '己未', '己巳'], wuXing: '火', direction: '南' },
+        '艮': { neiGua: ['丙辰', '丙午', '丙申'], waiGua: ['丙戌', '丙子', '丙寅'], wuXing: '土', direction: '东北' },
+        '兑': { neiGua: ['丁巳', '丁卯', '丁丑'], waiGua: ['丁亥', '丁酉', '丁未'], wuXing: '金', direction: '西' }
     },
     
-    // 地支五行对应
+    // ==================== 地支五行 ====================
     diZhiWuXing: {
         '子': '水', '丑': '土', '寅': '木', '卯': '木',
         '辰': '土', '巳': '火', '午': '火', '未': '土',
         '申': '金', '酉': '金', '戌': '土', '亥': '水'
     },
     
-    // 地支六合
+    // ==================== 地支六合 ====================
     diZhiLiuHe: {
         '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
         '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰',
         '巳': '申', '申': '巳', '午': '未', '未': '午'
     },
     
-    // 地支六冲
+    // ==================== 地支六冲 ====================
     diZhiLiuChong: {
         '子': '午', '午': '子', '丑': '未', '未': '丑',
         '寅': '申', '申': '寅', '卯': '酉', '酉': '卯',
         '辰': '戌', '戌': '辰', '巳': '亥', '亥': '巳'
     },
     
-    // 地支三合局
+    // ==================== 地支三合局 ====================
     diZhiSanHe: {
         '申子辰': '水', '巳酉丑': '金',
         '寅午戌': '火', '亥卯未': '木'
     },
     
-    // 天干五行
+    // ==================== 天干五行 ====================
     tianGanWuXing: {
         '甲': '木', '乙': '木', '丙': '火', '丁': '火',
         '戊': '土', '己': '土', '庚': '金', '辛': '金',
         '壬': '水', '癸': '水'
     },
     
-    // 六十四卦卦辞（完整版）
+    // ==================== 六十四卦卦辞（完整）====================
     hexagramTexts: {
-        1: {
-            name: '乾为天',
-            text: '元亨利贞。',
-            explanation: '乾卦象征天，具有元始、亨通、和谐、贞正的特性。代表刚健、主动、创始。',
-            judgment: '大吉，但需注意刚健过甚'
-        },
-        2: {
-            name: '坤为地',
-            text: '元亨，利牝马之贞。君子有攸往，先迷后得主，利西南得朋，东北丧朋。安贞吉。',
-            explanation: '坤卦象征地，具有包容、顺承的特性。以母马为喻，强调柔顺而坚持正道。',
-            judgment: '吉，宜柔顺守正'
-        },
-        3: {
-            name: '水雷屯',
-            text: '元亨利贞，勿用有攸往，利建侯。',
-            explanation: '屯卦象征事物初生时的艰难。利于建立基业，但不宜轻举妄动。',
-            judgment: '小吉，宜稳扎稳打'
-        },
-        4: {
-            name: '山水蒙',
-            text: '亨。匪我求童蒙，童蒙求我。初筮告，再三渎，渎则不告。利贞。',
-            explanation: '蒙卦象征启蒙、教育。强调求学需诚心，教育需耐心。',
-            judgment: '中吉，宜学习请教'
-        },
-        5: {
-            name: '水天需',
-            text: '有孚，光亨，贞吉，利涉大川。',
-            explanation: '需卦象征等待时机。心怀诚信，光明亨通，守正吉祥。',
-            judgment: '吉，宜耐心等待'
-        },
-        6: {
-            name: '天水讼',
-            text: '有孚窒惕，中吉，终凶。利见大人，不利涉大川。',
-            explanation: '讼卦象征争讼、纠纷。虽有诚信但需警惕，中间吉利最终凶险。',
-            judgment: '凶，宜避免争执'
-        },
-        7: {
-            name: '地水师',
-            text: '贞，丈人吉，无咎。',
-            explanation: '师卦象征军队、战争。坚守正道，有德长者统帅可获吉祥。',
-            judgment: '中平，宜谨慎行事'
-        },
-        8: {
-            name: '水地比',
-            text: '吉。原筮，元永贞，无咎。不宁方来，后夫凶。',
-            explanation: '比卦象征亲近、依附。吉祥，但需谨慎选择依附对象。',
-            judgment: '吉，宜团结协作'
-        },
-        9: {
-            name: '风天小畜',
-            text: '亨。密云不雨，自我西郊。',
-            explanation: '小畜卦象征小有蓄积。亨通，但力量尚弱，如密云不雨。',
-            judgment: '小吉，宜积蓄力量'
-        },
-        10: {
-            name: '天泽履',
-            text: '履虎尾，不咥人，亨。',
-            explanation: '履卦象征小心实践。如同踩到虎尾，谨慎则不受伤。',
-            judgment: '中吉，宜谨慎行事'
-        },
-        11: {
-            name: '地天泰',
-            text: '小往大来，吉亨。',
-            explanation: '泰卦象征通达、顺利。小的付出，大的收获，吉祥亨通。',
-            judgment: '大吉，宜积极进取'
-        },
-        12: {
-            name: '天地否',
-            text: '否之匪人，不利君子贞，大往小来。',
-            explanation: '否卦象征闭塞不通。时运不济，君子守正，付出多收获少。',
-            judgment: '凶，宜守成待时'
-        },
-        13: {
-            name: '天火同人',
-            text: '同人于野，亨，利涉大川，利君子贞。',
-            explanation: '同人卦象征与人协同。在野外与人协同，亨通，利于渡过大河。',
-            judgment: '吉，宜团结合作'
-        },
-        14: {
-            name: '火天大有',
-            text: '元亨。',
-            explanation: '大有卦象征大有收获。至为亨通，大有所成。',
-            judgment: '大吉，宜把握时机'
-        },
-        15: {
-            name: '地山谦',
-            text: '亨，君子有终。',
-            explanation: '谦卦象征谦虚。亨通，君子能始终保持谦虚，有好的结果。',
-            judgment: '大吉，宜谦虚谨慎'
-        },
-        16: {
-            name: '雷地豫',
-            text: '利建侯行师。',
-            explanation: '豫卦象征愉悦、安乐。利于建立诸侯，出兵作战。',
-            judgment: '吉，宜积极行动'
-        },
-        17: {
-            name: '泽雷随',
-            text: '元亨利贞，无咎。',
-            explanation: '随卦象征随从、顺应。至为亨通，坚守正道，没有灾祸。',
-            judgment: '吉，宜顺势而为'
-        },
-        18: {
-            name: '山风蛊',
-            text: '元亨，利涉大川。先甲三日，后甲三日。',
-            explanation: '蛊卦象征积弊、整治。至为亨通，利于渡过大河。需在甲日前三天后三天行事。',
-            judgment: '中平，宜整治弊病'
-        },
-        19: {
-            name: '地泽临',
-            text: '元亨利贞。至于八月有凶。',
-            explanation: '临卦象征督导、临事。至为亨通，坚守正道。到八月可能有凶险。',
-            judgment: '吉，但需防范'
-        },
-        20: {
-            name: '风地观',
-            text: '盥而不荐，有孚颙若。',
-            explanation: '观卦象征观察、展示。祭祀前洗手而不献祭，心存诚信而崇敬。',
-            judgment: '中吉，宜观察思考'
-        },
-        21: {
-            name: '火雷噬嗑',
-            text: '亨，利用狱。',
-            explanation: '噬嗑卦象征咬合、刑罚。亨通，利于处理刑狱之事。',
-            judgment: '中平，宜公正决断'
-        },
-        22: {
-            name: '山火贲',
-            text: '亨，小利有攸往。',
-            explanation: '贲卦象征文饰、美化。亨通，小有发展。',
-            judgment: '小吉，宜注重外表'
-        },
-        23: {
-            name: '山地剥',
-            text: '不利有攸往。',
-            explanation: '剥卦象征剥落、衰落。不利于有所行动。',
-            judgment: '凶，宜守成待时'
-        },
-        24: {
-            name: '地雷复',
-            text: '亨。出入无疾，朋来无咎。反复其道，七日来复，利有攸往。',
-            explanation: '复卦象征回复、复兴。亨通，出入没有疾病，朋友到来没有灾祸。',
-            judgment: '吉，宜重新开始'
-        },
-        25: {
-            name: '天雷无妄',
-            text: '元亨利贞。其匪正有眚，不利有攸往。',
-            explanation: '无妄卦象征不妄为。至为亨通，坚守正道。如果不正则有灾祸，不利于行动。',
-            judgment: '中吉，宜顺其自然'
-        },
-        26: {
-            name: '山天大畜',
-            text: '利贞，不家食吉，利涉大川。',
-            explanation: '大畜卦象征大有蓄积。利于坚守正道，不在家中吃饭吉祥，利于渡过大河。',
-            judgment: '吉，宜积蓄力量'
-        },
-        27: {
-            name: '山雷颐',
-            text: '贞吉。观颐，自求口实。',
-            explanation: '颐卦象征颐养、养育。坚守正道吉祥，观察颐养之道，自求口粮。',
-            judgment: '吉，宜注重养生'
-        },
-        28: {
-            name: '泽风大过',
-            text: '栋桡，利有攸往，亨。',
-            explanation: '大过卦象征过度、过分。栋梁弯曲，利于有所行动，亨通。',
-            judgment: '中平，宜适度调整'
-        },
-        29: {
-            name: '坎为水',
-            text: '习坎，有孚，维心亨，行有尚。',
-            explanation: '坎卦象征险陷。重重险陷，心怀诚信，内心亨通，行动有崇尚。',
-            judgment: '凶，宜小心谨慎'
-        },
-        30: {
-            name: '离为火',
-            text: '利贞，亨。畜牝牛吉。',
-            explanation: '离卦象征附丽、光明。利于坚守正道，亨通。畜养母牛吉祥。',
-            judgment: '吉，宜依附光明'
-        },
-        31: {
-            name: '泽山咸',
-            text: '亨，利贞，取女吉。',
-            explanation: '咸卦象征感应、互动。亨通，利于坚守正道，娶女吉祥。',
-            judgment: '吉，宜沟通互动'
-        },
-        32: {
-            name: '雷风恒',
-            text: '亨，无咎，利贞，利有攸往。',
-            explanation: '恒卦象征恒久、坚持。亨通，没有灾祸，利于坚守正道，利于有所行动。',
-            judgment: '吉，宜持之以恒'
-        },
-        33: {
-            name: '天山遁',
-            text: '亨，小利贞。',
-            explanation: '遁卦象征退避、隐遁。亨通，小利于坚守正道。',
-            judgment: '中平，宜退守待时'
-        },
-        34: {
-            name: '雷天大壮',
-            text: '利贞。',
-            explanation: '大壮卦象征强盛、壮大。利于坚守正道。',
-            judgment: '吉，宜谨慎用强'
-        },
-        35: {
-            name: '火地晋',
-            text: '康侯用锡马蕃庶，昼日三接。',
-            explanation: '晋卦象征晋升、前进。康侯用赏赐的马繁殖，一日之内多次接见。',
-            judgment: '吉，宜积极进取'
-        },
-        36: {
-            name: '地火明夷',
-            text: '利艰贞。',
-            explanation: '明夷卦象征光明受损。利于在艰难中坚守正道。',
-            judgment: '凶，宜韬光养晦'
-        },
-        37: {
-            name: '风火家人',
-            text: '利女贞。',
-            explanation: '家人卦象征家庭。利于女子坚守正道。',
-            judgment: '吉，宜注重家庭'
-        },
-        38: {
-            name: '火泽睽',
-            text: '小事吉。',
-            explanation: '睽卦象征乖离、对立。小事吉祥。',
-            judgment: '中平，宜求同存异'
-        },
-        39: {
-            name: '水山蹇',
-            text: '利西南，不利东北。利见大人，贞吉。',
-            explanation: '蹇卦象征艰难、险阻。利于向西南，不利于向东北。利于见大人，坚守正道吉祥。',
-            judgment: '凶，宜知难而退'
-        },
-        40: {
-            name: '雷水解',
-            text: '利西南，无所往，其来复吉。有攸往，夙吉。',
-            explanation: '解卦象征解脱、缓解。利于向西南，没有前往，返回吉祥。有所前往，早行吉祥。',
-            judgment: '吉，宜化解矛盾'
-        },
-        41: {
-            name: '山泽损',
-            text: '有孚，元吉，无咎，可贞，利有攸往。曷之用？二簋可用享。',
-            explanation: '损卦象征减损、损失。心怀诚信，至为吉祥，没有灾祸，可以坚守正道，利于有所行动。',
-            judgment: '吉，宜减损得益'
-        },
-        42: {
-            name: '风雷益',
-            text: '利有攸往，利涉大川。',
-            explanation: '益卦象征增益、受益。利于有所行动，利于渡过大河。',
-            judgment: '大吉，宜积极进取'
-        },
-        43: {
-            name: '泽天夬',
-            text: '扬于王庭，孚号有厉，告自邑，不利即戎，利有攸往。',
-            explanation: '夬卦象征决断、裁决。在王庭宣扬，诚信呼号有危险，从邑中告示，不利于立即用兵，利于有所行动。',
-            judgment: '中吉，宜果断决策'
-        },
-        44: {
-            name: '天风姤',
-            text: '女壮，勿用取女。',
-            explanation: '姤卦象征相遇、邂逅。女子强壮，不要娶这样的女子。',
-            judgment: '凶，宜谨慎交往'
-        },
-        45: {
-            name: '泽地萃',
-            text: '亨。王假有庙，利见大人，亨，利贞。用大牲吉，利有攸往。',
-            explanation: '萃卦象征聚集、会合。亨通。君王到宗庙祭祀，利于见大人，亨通，利于坚守正道。用大牲祭祀吉祥，利于有所行动。',
-            judgment: '吉，宜聚会合作'
-        },
-        46: {
-            name: '地风升',
-            text: '元亨，用见大人，勿恤，南征吉。',
-            explanation: '升卦象征上升、晋升。至为亨通，用于见大人，不必忧虑，向南征伐吉祥。',
-            judgment: '吉，宜积极上升'
-        },
-        47: {
-            name: '泽水困',
-            text: '亨，贞，大人吉，无咎，有言不信。',
-            explanation: '困卦象征困顿、困境。亨通，坚守正道，大人吉祥，没有灾祸，说话无人相信。',
-            judgment: '凶，宜坚守待时'
-        },
-        48: {
-            name: '水风井',
-            text: '改邑不改井，无丧无得，往来井井。汔至，亦未繘井，羸其瓶，凶。',
-            explanation: '井卦象征水井、稳定。改变城邑不改水井，没有损失没有获得，往来井然有序。几乎到达，还未提井绳，打破了水瓶，凶险。',
-            judgment: '中平，宜保持稳定'
-        },
-        49: {
-            name: '泽火革',
-            text: '巳日乃孚，元亨利贞，悔亡。',
-            explanation: '革卦象征变革、改革。在巳日才有诚信，至为亨通，利于坚守正道，悔恨消失。',
-            judgment: '吉，宜适时变革'
-        },
-        50: {
-            name: '火风鼎',
-            text: '元吉，亨。',
-            explanation: '鼎卦象征鼎器、稳定。至为吉祥，亨通。',
-            judgment: '大吉，宜稳固基业'
-        },
-        51: {
-            name: '震为雷',
-            text: '亨。震来虩虩，笑言哑哑。震惊百里，不丧匕鬯。',
-            explanation: '震卦象征震动、雷动。亨通。雷声传来令人恐惧，随后谈笑自如。雷声震惊百里，祭祀用的匕鬯不会失落。',
-            judgment: '吉，宜处变不惊'
-        },
-        52: {
-            name: '艮为山',
-            text: '艮其背，不获其身，行其庭，不见其人，无咎。',
-            explanation: '艮卦象征停止、静止。停止在背后，看不到身体，走在庭院，看不到人，没有灾祸。',
-            judgment: '中平，宜适时停止'
-        },
-        53: {
-            name: '风山渐',
-            text: '女归吉，利贞。',
-            explanation: '渐卦象征渐进、逐渐。女子出嫁吉祥，利于坚守正道。',
-            judgment: '吉，宜循序渐进'
-        },
-        54: {
-            name: '雷泽归妹',
-            text: '征凶，无攸利。',
-            explanation: '归妹卦象征嫁妹、婚配。征伐凶险，无所利益。',
-            judgment: '凶，宜谨慎婚配'
-        },
-        55: {
-            name: '雷火丰',
-            text: '亨，王假之，勿忧，宜日中。',
-            explanation: '丰卦象征丰盛、盛大。亨通，君王达到此境界，不必忧虑，适宜如日当空。',
-            judgment: '大吉，宜把握时机'
-        },
-        56: {
-            name: '火山旅',
-            text: '小亨，旅贞吉。',
-            explanation: '旅卦象征旅行、漂泊。小有亨通，旅行中坚守正道吉祥。',
-            judgment: '中平，宜谨慎出行'
-        },
-        57: {
-            name: '巽为风',
-            text: '小亨，利有攸往，利见大人。',
-            explanation: '巽卦象征顺从、进入。小有亨通，利于有所行动，利于见大人。',
-            judgment: '中吉，宜顺势而为'
-        },
-        58: {
-            name: '兑为泽',
-            text: '亨，利贞。',
-            explanation: '兑卦象征喜悦、言说。亨通，利于坚守正道。',
-            judgment: '吉，宜和悦待人'
-        },
-        59: {
-            name: '风水涣',
-            text: '亨。王假有庙，利涉大川，利贞。',
-            explanation: '涣卦象征涣散、离散。亨通。君王到宗庙祭祀，利于渡过大河，利于坚守正道。',
-            judgment: '中平，宜凝聚人心'
-        },
-        60: {
-            name: '水泽节',
-            text: '亨。苦节不可贞。',
-            explanation: '节卦象征节制、节约。亨通。过分节制不可以坚守。',
-            judgment: '中吉，宜适度节制'
-        },
-        61: {
-            name: '风泽中孚',
-            text: '豚鱼吉，利涉大川，利贞。',
-            explanation: '中孚卦象征诚信、守信。用豚鱼祭祀吉祥，利于渡过大河，利于坚守正道。',
-            judgment: '大吉，宜坚守诚信'
-        },
-        62: {
-            name: '雷山小过',
-            text: '亨，利贞，可小事，不可大事。飞鸟遗之音，不宜上宜下，大吉。',
-            explanation: '小过卦象征小有过越。亨通，利于坚守正道，可以做小事，不可以做大事。飞鸟留下声音，不宜向上宜向下，大吉。',
-            judgment: '中吉，宜小处着手'
-        },
-        63: {
-            name: '水火既济',
-            text: '亨，小利贞，初吉终乱。',
-            explanation: '既济卦象征完成、成功。亨通，小利于坚守正道，开始吉祥最终混乱。',
-            judgment: '吉，宜防微杜渐'
-        },
-        64: {
-            name: '火水未济',
-            text: '亨，小狐汔济，濡其尾，无攸利。',
-            explanation: '未济卦象征未完成、未成功。亨通，小狐狸几乎渡河，沾湿了尾巴，无所利益。',
-            judgment: '凶，宜谨慎收尾'
-        }
+        1: { name: '乾为天', text: '元亨利贞。', explanation: '乾卦象征天，具有元始、亨通、和谐、贞正的特性。代表刚健、主动、创始。', judgment: '大吉，但需注意刚健过甚' },
+        2: { name: '坤为地', text: '元亨，利牝马之贞。君子有攸往，先迷后得主，利西南得朋，东北丧朋。安贞吉。', explanation: '坤卦象征地，具有包容、顺承的特性。以母马为喻，强调柔顺而坚持正道。', judgment: '吉，宜柔顺守正' },
+        3: { name: '水雷屯', text: '元亨利贞，勿用有攸往，利建侯。', explanation: '屯卦象征事物初生时的艰难。利于建立基业，但不宜轻举妄动。', judgment: '小吉，宜稳扎稳打' },
+        4: { name: '山水蒙', text: '亨。匪我求童蒙，童蒙求我。初筮告，再三渎，渎则不告。利贞。', explanation: '蒙卦象征启蒙、教育。强调求学需诚心，教育需耐心。', judgment: '中吉，宜学习请教' },
+        5: { name: '水天需', text: '有孚，光亨，贞吉，利涉大川。', explanation: '需卦象征等待时机。心怀诚信，光明亨通，守正吉祥。', judgment: '吉，宜耐心等待' },
+        6: { name: '天水讼', text: '有孚窒惕，中吉，终凶。利见大人，不利涉大川。', explanation: '讼卦象征争讼、纠纷。虽有诚信但需警惕，中间吉利最终凶险。', judgment: '凶，宜避免争执' },
+        7: { name: '地水师', text: '贞，丈人吉，无咎。', explanation: '师卦象征军队、战争。坚守正道，有德长者统帅可获吉祥。', judgment: '中平，宜谨慎行事' },
+        8: { name: '水地比', text: '吉。原筮，元永贞，无咎。不宁方来，后夫凶。', explanation: '比卦象征亲近、依附。吉祥，但需谨慎选择依附对象。', judgment: '吉，宜团结协作' },
+        9: { name: '风天小畜', text: '亨。密云不雨，自我西郊。', explanation: '小畜卦象征小有蓄积。亨通，但力量尚弱，如密云不雨。', judgment: '小吉，宜积蓄力量' },
+        10: { name: '天泽履', text: '履虎尾，不咥人，亨。', explanation: '履卦象征小心实践。如同踩到虎尾，谨慎则不受伤。', judgment: '中吉，宜谨慎行事' },
+        11: { name: '地天泰', text: '小往大来，吉亨。', explanation: '泰卦象征通达、顺利。小的付出，大的收获，吉祥亨通。', judgment: '大吉，宜积极进取' },
+        12: { name: '天地否', text: '否之匪人，不利君子贞，大往小来。', explanation: '否卦象征闭塞不通。时运不济，君子守正，付出多收获少。', judgment: '凶，宜守成待时' },
+        13: { name: '天火同人', text: '同人于野，亨，利涉大川，利君子贞。', explanation: '同人卦象征与人协同。在野外与人协同，亨通，利于渡过大河。', judgment: '吉，宜团结合作' },
+        14: { name: '火天大有', text: '元亨。', explanation: '大有卦象征大有收获。至为亨通，大有所成。', judgment: '大吉，宜把握时机' },
+        15: { name: '地山谦', text: '亨，君子有终。', explanation: '谦卦象征谦虚。亨通，君子能始终保持谦虚，有好的结果。', judgment: '大吉，宜谦虚谨慎' },
+        16: { name: '雷地豫', text: '利建侯行师。', explanation: '豫卦象征愉悦、安乐。利于建立诸侯，出兵作战。', judgment: '吉，宜积极行动' },
+        17: { name: '泽雷随', text: '元亨利贞，无咎。', explanation: '随卦象征随从、顺应。至为亨通，坚守正道，没有灾祸。', judgment: '吉，宜顺势而为' },
+        18: { name: '山风蛊', text: '元亨，利涉大川。先甲三日，后甲三日。', explanation: '蛊卦象征积弊、整治。至为亨通，利于渡过大河。需在甲日前三天后三天行事。', judgment: '中平，宜整治弊病' },
+        19: { name: '地泽临', text: '元亨利贞。至于八月有凶。', explanation: '临卦象征督导、临事。至为亨通，坚守正道。到八月可能有凶险。', judgment: '吉，但需防范' },
+        20: { name: '风地观', text: '盥而不荐，有孚颙若。', explanation: '观卦象征观察、展示。祭祀前洗手而不献祭，心存诚信而崇敬。', judgment: '中吉，宜观察思考' },
+        21: { name: '火雷噬嗑', text: '亨，利用狱。', explanation: '噬嗑卦象征咬合、刑罚。亨通，利于处理刑狱之事。', judgment: '中平，宜公正决断' },
+        22: { name: '山火贲', text: '亨，小利有攸往。', explanation: '贲卦象征文饰、美化。亨通，小有发展。', judgment: '小吉，宜注重外表' },
+        23: { name: '山地剥', text: '不利有攸往。', explanation: '剥卦象征剥落、衰落。不利于有所行动。', judgment: '凶，宜守成待时' },
+        24: { name: '地雷复', text: '亨。出入无疾，朋来无咎。反复其道，七日来复，利有攸往。', explanation: '复卦象征回复、复兴。亨通，出入没有疾病，朋友到来没有灾祸。', judgment: '吉，宜重新开始' },
+        25: { name: '天雷无妄', text: '元亨利贞。其匪正有眚，不利有攸往。', explanation: '无妄卦象征不妄为。至为亨通，坚守正道。如果不正则有灾祸，不利于行动。', judgment: '中吉，宜顺其自然' },
+        26: { name: '山天大畜', text: '利贞，不家食吉，利涉大川。', explanation: '大畜卦象征大有蓄积。利于坚守正道，不在家中吃饭吉祥，利于渡过大河。', judgment: '吉，宜积蓄力量' },
+        27: { name: '山雷颐', text: '贞吉。观颐，自求口实。', explanation: '颐卦象征颐养、养育。坚守正道吉祥，观察颐养之道，自求口粮。', judgment: '吉，宜注重养生' },
+        28: { name: '泽风大过', text: '栋桡，利有攸往，亨。', explanation: '大过卦象征过度、过分。栋梁弯曲，利于有所行动，亨通。', judgment: '中平，宜适度调整' },
+        29: { name: '坎为水', text: '习坎，有孚，维心亨，行有尚。', explanation: '坎卦象征险陷。重重险陷，心怀诚信，内心亨通，行动有崇尚。', judgment: '凶，宜小心谨慎' },
+        30: { name: '离为火', text: '利贞，亨。畜牝牛吉。', explanation: '离卦象征附丽、光明。利于坚守正道，亨通。畜养母牛吉祥。', judgment: '吉，宜依附光明' },
+        31: { name: '泽山咸', text: '亨，利贞，取女吉。', explanation: '咸卦象征感应、互动。亨通，利于坚守正道，娶女吉祥。', judgment: '吉，宜沟通互动' },
+        32: { name: '雷风恒', text: '亨，无咎，利贞，利有攸往。', explanation: '恒卦象征恒久、坚持。亨通，没有灾祸，利于坚守正道，利于有所行动。', judgment: '吉，宜持之以恒' },
+        33: { name: '天山遁', text: '亨，小利贞。', explanation: '遁卦象征退避、隐遁。亨通，小利于坚守正道。', judgment: '中平，宜退守待时' },
+        34: { name: '雷天大壮', text: '利贞。', explanation: '大壮卦象征强盛、壮大。利于坚守正道。', judgment: '吉，宜谨慎用强' },
+        35: { name: '火地晋', text: '康侯用锡马蕃庶，昼日三接。', explanation: '晋卦象征晋升、前进。康侯用赏赐的马繁殖，一日之内多次接见。', judgment: '吉，宜积极进取' },
+        36: { name: '地火明夷', text: '利艰贞。', explanation: '明夷卦象征光明受损。利于在艰难中坚守正道。', judgment: '凶，宜韬光养晦' },
+        37: { name: '风火家人', text: '利女贞。', explanation: '家人卦象征家庭。利于女子坚守正道。', judgment: '吉，宜注重家庭' },
+        38: { name: '火泽睽', text: '小事吉。', explanation: '睽卦象征乖离、对立。小事吉祥。', judgment: '中平，宜求同存异' },
+        39: { name: '水山蹇', text: '利西南，不利东北。利见大人，贞吉。', explanation: '蹇卦象征艰难、险阻。利于向西南，不利于向东北。利于见大人，坚守正道吉祥。', judgment: '凶，宜知难而退' },
+        40: { name: '雷水解', text: '利西南，无所往，其来复吉。有攸往，夙吉。', explanation: '解卦象征解脱、缓解。利于向西南，没有前往，返回吉祥。有所前往，早行吉祥。', judgment: '吉，宜化解矛盾' },
+        41: { name: '山泽损', text: '有孚，元吉，无咎，可贞，利有攸往。曷之用？二簋可用享。', explanation: '损卦象征减损、损失。心怀诚信，至为吉祥，没有灾祸，可以坚守正道，利于有所行动。', judgment: '吉，宜减损得益' },
+        42: { name: '风雷益', text: '利有攸往，利涉大川。', explanation: '益卦象征增益、受益。利于有所行动，利于渡过大河。', judgment: '大吉，宜积极进取' },
+        43: { name: '泽天夬', text: '扬于王庭，孚号有厉，告自邑，不利即戎，利有攸往。', explanation: '夬卦象征决断、裁决。在王庭宣扬，诚信呼号有危险，从邑中告示，不利于立即用兵，利于有所行动。', judgment: '中吉，宜果断决策' },
+        44: { name: '天风姤', text: '女壮，勿用取女。', explanation: '姤卦象征相遇、邂逅。女子强壮，不要娶这样的女子。', judgment: '凶，宜谨慎交往' },
+        45: { name: '泽地萃', text: '亨。王假有庙，利见大人，亨，利贞。用大牲吉，利有攸往。', explanation: '萃卦象征聚集、会合。亨通。君王到宗庙祭祀，利于见大人，亨通，利于坚守正道。用大牲祭祀吉祥，利于有所行动。', judgment: '吉，宜聚会合作' },
+        46: { name: '地风升', text: '元亨，用见大人，勿恤，南征吉。', explanation: '升卦象征上升、晋升。至为亨通，用于见大人，不必忧虑，向南征伐吉祥。', judgment: '吉，宜积极上升' },
+        47: { name: '泽水困', text: '亨，贞，大人吉，无咎，有言不信。', explanation: '困卦象征困顿、困境。亨通，坚守正道，大人吉祥，没有灾祸，说话无人相信。', judgment: '凶，宜坚守待时' },
+        48: { name: '水风井', text: '改邑不改井，无丧无得，往来井井。汔至，亦未繘井，羸其瓶，凶。', explanation: '井卦象征水井、稳定。改变城邑不改水井，没有损失没有获得，往来井然有序。几乎到达，还未提井绳，打破了水瓶，凶险。', judgment: '中平，宜保持稳定' },
+        49: { name: '泽火革', text: '巳日乃孚，元亨利贞，悔亡。', explanation: '革卦象征变革、改革。在巳日才有诚信，至为亨通，利于坚守正道，悔恨消失。', judgment: '吉，宜适时变革' },
+        50: { name: '火风鼎', text: '元吉，亨。', explanation: '鼎卦象征鼎器、稳定。至为吉祥，亨通。', judgment: '大吉，宜稳固基业' },
+        51: { name: '震为雷', text: '亨。震来虩虩，笑言哑哑。震惊百里，不丧匕鬯。', explanation: '震卦象征震动、雷动。亨通。雷声传来令人恐惧，随后谈笑自如。雷声震惊百里，祭祀用的匕鬯不会失落。', judgment: '吉，宜处变不惊' },
+        52: { name: '艮为山', text: '艮其背，不获其身，行其庭，不见其人，无咎。', explanation: '艮卦象征停止、静止。停止在背后，看不到身体，走在庭院，看不到人，没有灾祸。', judgment: '中平，宜适时停止' },
+        53: { name: '风山渐', text: '女归吉，利贞。', explanation: '渐卦象征渐进、逐渐。女子出嫁吉祥，利于坚守正道。', judgment: '吉，宜循序渐进' },
+        54: { name: '雷泽归妹', text: '征凶，无攸利。', explanation: '归妹卦象征嫁妹、婚配。征伐凶险，无所利益。', judgment: '凶，宜谨慎婚配' },
+        55: { name: '雷火丰', text: '亨，王假之，勿忧，宜日中。', explanation: '丰卦象征丰盛、盛大。亨通，君王达到此境界，不必忧虑，适宜如日当空。', judgment: '大吉，宜把握时机' },
+        56: { name: '火山旅', text: '小亨，旅贞吉。', explanation: '旅卦象征旅行、漂泊。小有亨通，旅行中坚守正道吉祥。', judgment: '中平，宜谨慎出行' },
+        57: { name: '巽为风', text: '小亨，利有攸往，利见大人。', explanation: '巽卦象征顺从、进入。小有亨通，利于有所行动，利于见大人。', judgment: '中吉，宜顺势而为' },
+        58: { name: '兑为泽', text: '亨，利贞。', explanation: '兑卦象征喜悦、言说。亨通，利于坚守正道。', judgment: '吉，宜和悦待人' },
+        59: { name: '风水涣', text: '亨。王假有庙，利涉大川，利贞。', explanation: '涣卦象征涣散、离散。亨通。君王到宗庙祭祀，利于渡过大河，利于坚守正道。', judgment: '中平，宜凝聚人心' },
+        60: { name: '水泽节', text: '亨。苦节不可贞。', explanation: '节卦象征节制、节约。亨通。过分节制不可以坚守。', judgment: '中吉，宜适度节制' },
+        61: { name: '风泽中孚', text: '豚鱼吉，利涉大川，利贞。', explanation: '中孚卦象征诚信、守信。用豚鱼祭祀吉祥，利于渡过大河，利于坚守正道。', judgment: '大吉，宜坚守诚信' },
+        62: { name: '雷山小过', text: '亨，利贞，可小事，不可大事。飞鸟遗之音，不宜上宜下，大吉。', explanation: '小过卦象征小有过越。亨通，利于坚守正道，可以做小事，不可以做大事。飞鸟留下声音，不宜向上宜向下，大吉。', judgment: '中吉，宜小处着手' },
+        63: { name: '水火既济', text: '亨，小利贞，初吉终乱。', explanation: '既济卦象征完成、成功。亨通，小利于坚守正道，开始吉祥最终混乱。', judgment: '吉，宜防微杜渐' },
+        64: { name: '火水未济', text: '亨，小狐汔济，濡其尾，无攸利。', explanation: '未济卦象征未完成、未成功。亨通，小狐狸几乎渡河，沾湿了尾巴，无所利益。', judgment: '凶，宜谨慎收尾' }
     },
     
-    // 爻辞数据库（完整版）
+    // ==================== 爻辞数据库（完整版）====================
     yaoTexts: {
-        1: { // 乾卦爻辞
+        1: { // 乾
             1: '初九：潜龙勿用。',
             2: '九二：见龙在田，利见大人。',
             3: '九三：君子终日乾乾，夕惕若厉，无咎。',
@@ -580,7 +223,7 @@ const hexagramDatabase = {
             6: '上九：亢龙有悔。',
             7: '用九：见群龙无首，吉。'
         },
-        2: { // 坤卦爻辞
+        2: { // 坤
             1: '初六：履霜，坚冰至。',
             2: '六二：直方大，不习无不利。',
             3: '六三：含章可贞，或从王事，无成有终。',
@@ -589,7 +232,7 @@ const hexagramDatabase = {
             6: '上六：龙战于野，其血玄黄。',
             7: '用六：利永贞。'
         },
-        3: { // 屯卦爻辞
+        3: { // 屯
             1: '初九：磐桓，利居贞，利建侯。',
             2: '六二：屯如邅如，乘马班如。匪寇婚媾，女子贞不字，十年乃字。',
             3: '六三：即鹿无虞，惟入于林中，君子几不如舍，往吝。',
@@ -597,7 +240,7 @@ const hexagramDatabase = {
             5: '九五：屯其膏，小贞吉，大贞凶。',
             6: '上六：乘马班如，泣血涟如。'
         },
-        4: { // 蒙卦爻辞
+        4: { // 蒙
             1: '初六：发蒙，利用刑人，用说桎梏，以往吝。',
             2: '九二：包蒙吉，纳妇吉，子克家。',
             3: '六三：勿用取女，见金夫，不有躬，无攸利。',
@@ -605,7 +248,7 @@ const hexagramDatabase = {
             5: '六五：童蒙，吉。',
             6: '上九：击蒙，不利为寇，利御寇。'
         },
-        5: { // 需卦爻辞
+        5: { // 需
             1: '初九：需于郊，利用恒，无咎。',
             2: '九二：需于沙，小有言，终吉。',
             3: '九三：需于泥，致寇至。',
@@ -613,7 +256,7 @@ const hexagramDatabase = {
             5: '九五：需于酒食，贞吉。',
             6: '上六：入于穴，有不速之客三人来，敬之终吉。'
         },
-        6: { // 讼卦爻辞
+        6: { // 讼
             1: '初六：不永所事，小有言，终吉。',
             2: '九二：不克讼，归而逋，其邑人三百户无眚。',
             3: '六三：食旧德，贞厉，终吉。或从王事，无成。',
@@ -621,7 +264,7 @@ const hexagramDatabase = {
             5: '九五：讼，元吉。',
             6: '上九：或锡之鞶带，终朝三褫之。'
         },
-        7: { // 师卦爻辞
+        7: { // 师
             1: '初六：师出以律，否臧凶。',
             2: '九二：在师中，吉无咎，王三锡命。',
             3: '六三：师或舆尸，凶。',
@@ -629,7 +272,7 @@ const hexagramDatabase = {
             5: '六五：田有禽，利执言，无咎。长子帅师，弟子舆尸，贞凶。',
             6: '上六：大君有命，开国承家，小人勿用。'
         },
-        8: { // 比卦爻辞
+        8: { // 比
             1: '初六：有孚比之，无咎。有孚盈缶，终来有它吉。',
             2: '六二：比之自内，贞吉。',
             3: '六三：比之匪人。',
@@ -637,7 +280,7 @@ const hexagramDatabase = {
             5: '九五：显比，王用三驱，失前禽，邑人不诫，吉。',
             6: '上六：比之无首，凶。'
         },
-        9: { // 小畜卦爻辞
+        9: { // 小畜
             1: '初九：复自道，何其咎？吉。',
             2: '九二：牵复，吉。',
             3: '九三：舆说辐，夫妻反目。',
@@ -645,7 +288,7 @@ const hexagramDatabase = {
             5: '九五：有孚挛如，富以其邻。',
             6: '上九：既雨既处，尚德载，妇贞厉。月几望，君子征凶。'
         },
-        10: { // 履卦爻辞
+        10: { // 履
             1: '初九：素履，往无咎。',
             2: '九二：履道坦坦，幽人贞吉。',
             3: '六三：眇能视，跛能履，履虎尾，咥人，凶。武人为于大君。',
@@ -653,7 +296,7 @@ const hexagramDatabase = {
             5: '九五：夬履，贞厉。',
             6: '上九：视履考祥，其旋元吉。'
         },
-        11: { // 泰卦爻辞
+        11: { // 泰
             1: '初九：拔茅茹，以其汇，征吉。',
             2: '九二：包荒，用冯河，不遐遗，朋亡，得尚于中行。',
             3: '九三：无平不陂，无往不复，艰贞无咎。勿恤其孚，于食有福。',
@@ -661,7 +304,7 @@ const hexagramDatabase = {
             5: '六五：帝乙归妹，以祉元吉。',
             6: '上六：城复于隍，勿用师。自邑告命，贞吝。'
         },
-        12: { // 否卦爻辞
+        12: { // 否
             1: '初六：拔茅茹，以其汇，贞吉，亨。',
             2: '六二：包承，小人吉，大人否，亨。',
             3: '六三：包羞。',
@@ -669,7 +312,7 @@ const hexagramDatabase = {
             5: '九五：休否，大人吉。其亡其亡，系于苞桑。',
             6: '上九：倾否，先否后喜。'
         },
-        13: { // 同人卦爻辞
+        13: { // 同人
             1: '初九：同人于门，无咎。',
             2: '六二：同人于宗，吝。',
             3: '九三：伏戎于莽，升其高陵，三岁不兴。',
@@ -677,7 +320,7 @@ const hexagramDatabase = {
             5: '九五：同人，先号咷而后笑，大师克相遇。',
             6: '上九：同人于郊，无悔。'
         },
-        14: { // 大有卦爻辞
+        14: { // 大有
             1: '初九：无交害，匪咎，艰则无咎。',
             2: '九二：大车以载，有攸往，无咎。',
             3: '九三：公用亨于天子，小人弗克。',
@@ -685,7 +328,7 @@ const hexagramDatabase = {
             5: '六五：厥孚交如，威如，吉。',
             6: '上九：自天佑之，吉无不利。'
         },
-        15: { // 谦卦爻辞
+        15: { // 谦
             1: '初六：谦谦君子，用涉大川，吉。',
             2: '六二：鸣谦，贞吉。',
             3: '九三：劳谦，君子有终，吉。',
@@ -693,7 +336,7 @@ const hexagramDatabase = {
             5: '六五：不富以其邻，利用侵伐，无不利。',
             6: '上六：鸣谦，利用行师，征邑国。'
         },
-        16: { // 豫卦爻辞
+        16: { // 豫
             1: '初六：鸣豫，凶。',
             2: '六二：介于石，不终日，贞吉。',
             3: '六三：盱豫，悔。迟有悔。',
@@ -701,7 +344,7 @@ const hexagramDatabase = {
             5: '六五：贞疾，恒不死。',
             6: '上六：冥豫，成有渝，无咎。'
         },
-        17: { // 随卦爻辞
+        17: { // 随
             1: '初九：官有渝，贞吉。出门交有功。',
             2: '六二：系小子，失丈夫。',
             3: '六三：系丈夫，失小子。随有求得，利居贞。',
@@ -709,7 +352,7 @@ const hexagramDatabase = {
             5: '九五：孚于嘉，吉。',
             6: '上六：拘系之，乃从维之。王用亨于西山。'
         },
-        18: { // 蛊卦爻辞
+        18: { // 蛊
             1: '初六：干父之蛊，有子，考无咎，厉终吉。',
             2: '九二：干母之蛊，不可贞。',
             3: '九三：干父之蛊，小有悔，无大咎。',
@@ -717,7 +360,7 @@ const hexagramDatabase = {
             5: '六五：干父之蛊，用誉。',
             6: '上九：不事王侯，高尚其事。'
         },
-        19: { // 临卦爻辞
+        19: { // 临
             1: '初九：咸临，贞吉。',
             2: '九二：咸临，吉无不利。',
             3: '六三：甘临，无攸利。既忧之，无咎。',
@@ -725,7 +368,7 @@ const hexagramDatabase = {
             5: '六五：知临，大君之宜，吉。',
             6: '上六：敦临，吉无咎。'
         },
-        20: { // 观卦爻辞
+        20: { // 观
             1: '初六：童观，小人无咎，君子吝。',
             2: '六二：窥观，利女贞。',
             3: '六三：观我生，进退。',
@@ -733,7 +376,7 @@ const hexagramDatabase = {
             5: '九五：观我生，君子无咎。',
             6: '上九：观其生，君子无咎。'
         },
-        21: { // 噬嗑卦爻辞
+        21: { // 噬嗑
             1: '初九：屦校灭趾，无咎。',
             2: '六二：噬肤灭鼻，无咎。',
             3: '六三：噬腊肉，遇毒，小吝，无咎。',
@@ -741,7 +384,7 @@ const hexagramDatabase = {
             5: '六五：噬干肉，得黄金，贞厉，无咎。',
             6: '上九：何校灭耳，凶。'
         },
-        22: { // 贲卦爻辞
+        22: { // 贲
             1: '初九：贲其趾，舍车而徒。',
             2: '六二：贲其须。',
             3: '九三：贲如濡如，永贞吉。',
@@ -749,7 +392,7 @@ const hexagramDatabase = {
             5: '六五：贲于丘园，束帛戋戋，吝，终吉。',
             6: '上九：白贲，无咎。'
         },
-        23: { // 剥卦爻辞
+        23: { // 剥
             1: '初六：剥床以足，蔑贞凶。',
             2: '六二：剥床以辨，蔑贞凶。',
             3: '六三：剥之，无咎。',
@@ -757,7 +400,7 @@ const hexagramDatabase = {
             5: '六五：贯鱼，以宫人宠，无不利。',
             6: '上九：硕果不食，君子得舆，小人剥庐。'
         },
-        24: { // 复卦爻辞
+        24: { // 复
             1: '初九：不远复，无祗悔，元吉。',
             2: '六二：休复，吉。',
             3: '六三：频复，厉无咎。',
@@ -765,7 +408,7 @@ const hexagramDatabase = {
             5: '六五：敦复，无悔。',
             6: '上六：迷复，凶，有灾眚。用行师，终有大败，以其国君凶，至于十年不克征。'
         },
-        25: { // 无妄卦爻辞
+        25: { // 无妄
             1: '初九：无妄，往吉。',
             2: '六二：不耕获，不菑畲，则利有攸往。',
             3: '六三：无妄之灾，或系之牛，行人之得，邑人之灾。',
@@ -773,7 +416,7 @@ const hexagramDatabase = {
             5: '九五：无妄之疾，勿药有喜。',
             6: '上九：无妄，行有眚，无攸利。'
         },
-        26: { // 大畜卦爻辞
+        26: { // 大畜
             1: '初九：有厉，利已。',
             2: '九二：舆说輹。',
             3: '九三：良马逐，利艰贞。曰闲舆卫，利有攸往。',
@@ -781,7 +424,7 @@ const hexagramDatabase = {
             5: '六五：豮豕之牙，吉。',
             6: '上九：何天之衢，亨。'
         },
-        27: { // 颐卦爻辞
+        27: { // 颐
             1: '初九：舍尔灵龟，观我朵颐，凶。',
             2: '六二：颠颐，拂经，于丘颐，征凶。',
             3: '六三：拂颐，贞凶，十年勿用，无攸利。',
@@ -789,7 +432,7 @@ const hexagramDatabase = {
             5: '六五：拂经，居贞吉，不可涉大川。',
             6: '上九：由颐，厉吉，利涉大川。'
         },
-        28: { // 大过卦爻辞
+        28: { // 大过
             1: '初六：藉用白茅，无咎。',
             2: '九二：枯杨生稊，老夫得其女妻，无不利。',
             3: '九三：栋桡，凶。',
@@ -797,7 +440,7 @@ const hexagramDatabase = {
             5: '九五：枯杨生华，老妇得其士夫，无咎无誉。',
             6: '上六：过涉灭顶，凶，无咎。'
         },
-        29: { // 坎卦爻辞
+        29: { // 坎
             1: '初六：习坎，入于坎窞，凶。',
             2: '九二：坎有险，求小得。',
             3: '六三：来之坎坎，险且枕，入于坎窞，勿用。',
@@ -805,7 +448,7 @@ const hexagramDatabase = {
             5: '九五：坎不盈，祗既平，无咎。',
             6: '上六：系用徽纆，寘于丛棘，三岁不得，凶。'
         },
-        30: { // 离卦爻辞
+        30: { // 离
             1: '初九：履错然，敬之无咎。',
             2: '六二：黄离，元吉。',
             3: '九三：日昃之离，不鼓缶而歌，则大耋之嗟，凶。',
@@ -813,7 +456,7 @@ const hexagramDatabase = {
             5: '六五：出涕沱若，戚嗟若，吉。',
             6: '上九：王用出征，有嘉折首，获匪其丑，无咎。'
         },
-        31: { // 咸卦爻辞
+        31: { // 咸
             1: '初六：咸其拇。',
             2: '六二：咸其腓，凶，居吉。',
             3: '九三：咸其股，执其随，往吝。',
@@ -821,7 +464,7 @@ const hexagramDatabase = {
             5: '九五：咸其脢，无悔。',
             6: '上六：咸其辅颊舌。'
         },
-        32: { // 恒卦爻辞
+        32: { // 恒
             1: '初六：浚恒，贞凶，无攸利。',
             2: '九二：悔亡。',
             3: '九三：不恒其德，或承之羞，贞吝。',
@@ -829,7 +472,7 @@ const hexagramDatabase = {
             5: '六五：恒其德，贞，妇人吉，夫子凶。',
             6: '上六：振恒，凶。'
         },
-        33: { // 遁卦爻辞
+        33: { // 遁
             1: '初六：遁尾，厉，勿用有攸往。',
             2: '六二：执之用黄牛之革，莫之胜说。',
             3: '九三：系遁，有疾厉，畜臣妾吉。',
@@ -837,7 +480,7 @@ const hexagramDatabase = {
             5: '九五：嘉遁，贞吉。',
             6: '上九：肥遁，无不利。'
         },
-        34: { // 大壮卦爻辞
+        34: { // 大壮
             1: '初九：壮于趾，征凶，有孚。',
             2: '九二：贞吉。',
             3: '九三：小人用壮，君子用罔，贞厉。羝羊触藩，羸其角。',
@@ -845,7 +488,7 @@ const hexagramDatabase = {
             5: '六五：丧羊于易，无悔。',
             6: '上六：羝羊触藩，不能退，不能遂，无攸利，艰则吉。'
         },
-        35: { // 晋卦爻辞
+        35: { // 晋
             1: '初六：晋如摧如，贞吉。罔孚，裕无咎。',
             2: '六二：晋如愁如，贞吉。受兹介福，于其王母。',
             3: '六三：众允，悔亡。',
@@ -853,7 +496,7 @@ const hexagramDatabase = {
             5: '六五：悔亡，失得勿恤，往吉无不利。',
             6: '上九：晋其角，维用伐邑，厉吉无咎，贞吝。'
         },
-        36: { // 明夷卦爻辞
+        36: { // 明夷
             1: '初九：明夷于飞，垂其翼。君子于行，三日不食。有攸往，主人有言。',
             2: '六二：明夷，夷于左股，用拯马壮，吉。',
             3: '九三：明夷于南狩，得其大首，不可疾贞。',
@@ -861,7 +504,7 @@ const hexagramDatabase = {
             5: '六五：箕子之明夷，利贞。',
             6: '上六：不明晦，初登于天，后入于地。'
         },
-        37: { // 家人卦爻辞
+        37: { // 家人
             1: '初九：闲有家，悔亡。',
             2: '六二：无攸遂，在中馈，贞吉。',
             3: '九三：家人嗃嗃，悔厉吉。妇子嘻嘻，终吝。',
@@ -869,7 +512,7 @@ const hexagramDatabase = {
             5: '九五：王假有家，勿恤，吉。',
             6: '上九：有孚威如，终吉。'
         },
-        38: { // 睽卦爻辞
+        38: { // 睽
             1: '初九：悔亡。丧马勿逐，自复。见恶人，无咎。',
             2: '九二：遇主于巷，无咎。',
             3: '六三：见舆曳，其牛掣，其人天且劓，无初有终。',
@@ -877,7 +520,7 @@ const hexagramDatabase = {
             5: '六五：悔亡，厥宗噬肤，往何咎。',
             6: '上九：睽孤，见豕负涂，载鬼一车。先张之弧，后说之弧，匪寇婚媾，往遇雨则吉。'
         },
-        39: { // 蹇卦爻辞
+        39: { // 蹇
             1: '初六：往蹇，来誉。',
             2: '六二：王臣蹇蹇，匪躬之故。',
             3: '九三：往蹇，来反。',
@@ -885,7 +528,7 @@ const hexagramDatabase = {
             5: '九五：大蹇，朋来。',
             6: '上六：往蹇，来硕，吉。利见大人。'
         },
-        40: { // 解卦爻辞
+        40: { // 解
             1: '初六：无咎。',
             2: '九二：田获三狐，得黄矢，贞吉。',
             3: '六三：负且乘，致寇至，贞吝。',
@@ -893,7 +536,7 @@ const hexagramDatabase = {
             5: '六五：君子维有解，吉。有孚于小人。',
             6: '上六：公用射隼于高墉之上，获之，无不利。'
         },
-        41: { // 损卦爻辞
+        41: { // 损
             1: '初九：已事遄往，无咎，酌损之。',
             2: '九二：利贞，征凶，弗损益之。',
             3: '六三：三人行，则损一人。一人行，则得其友。',
@@ -901,7 +544,7 @@ const hexagramDatabase = {
             5: '六五：或益之十朋之龟，弗克违，元吉。',
             6: '上九：弗损益之，无咎，贞吉，利有攸往。得臣无家。'
         },
-        42: { // 益卦爻辞
+        42: { // 益
             1: '初九：利用为大作，元吉，无咎。',
             2: '六二：或益之十朋之龟，弗克违，永贞吉。王用享于帝，吉。',
             3: '六三：益之用凶事，无咎。有孚中行，告公用圭。',
@@ -909,7 +552,7 @@ const hexagramDatabase = {
             5: '九五：有孚惠心，勿问元吉。有孚惠我德。',
             6: '上九：莫益之，或击之，立心勿恒，凶。'
         },
-        43: { // 夬卦爻辞
+        43: { // 夬
             1: '初九：壮于前趾，往不胜为咎。',
             2: '九二：惕号，莫夜有戎，勿恤。',
             3: '九三：壮于頄，有凶。君子夬夬独行，遇雨若濡，有愠无咎。',
@@ -917,7 +560,7 @@ const hexagramDatabase = {
             5: '九五：苋陆夬夬，中行无咎。',
             6: '上六：无号，终有凶。'
         },
-        44: { // 姤卦爻辞
+        44: { // 姤
             1: '初六：系于金柅，贞吉。有攸往，见凶。羸豕孚蹢躅。',
             2: '九二：包有鱼，无咎，不利宾。',
             3: '九三：臀无肤，其行次且，厉，无大咎。',
@@ -925,7 +568,7 @@ const hexagramDatabase = {
             5: '九五：以杞包瓜，含章，有陨自天。',
             6: '上九：姤其角，吝，无咎。'
         },
-        45: { // 萃卦爻辞
+        45: { // 萃
             1: '初六：有孚不终，乃乱乃萃。若号，一握为笑。勿恤，往无咎。',
             2: '六二：引吉，无咎。孚乃利用禴。',
             3: '六三：萃如嗟如，无攸利。往无咎，小吝。',
@@ -933,7 +576,7 @@ const hexagramDatabase = {
             5: '九五：萃有位，无咎。匪孚，元永贞，悔亡。',
             6: '上六：赍咨涕洟，无咎。'
         },
-        46: { // 升卦爻辞
+        46: { // 升
             1: '初六：允升，大吉。',
             2: '九二：孚乃利用禴，无咎。',
             3: '九三：升虚邑。',
@@ -941,7 +584,7 @@ const hexagramDatabase = {
             5: '六五：贞吉，升阶。',
             6: '上六：冥升，利于不息之贞。'
         },
-        47: { // 困卦爻辞
+        47: { // 困
             1: '初六：臀困于株木，入于幽谷，三岁不觌。',
             2: '九二：困于酒食，朱绂方来，利用享祀。征凶，无咎。',
             3: '六三：困于石，据于蒺藜，入于其宫，不见其妻，凶。',
@@ -949,7 +592,7 @@ const hexagramDatabase = {
             5: '九五：劓刖，困于赤绂，乃徐有说，利用祭祀。',
             6: '上六：困于葛藟，于臲卼，曰动悔有悔，征吉。'
         },
-        48: { // 井卦爻辞
+        48: { // 井
             1: '初六：井泥不食，旧井无禽。',
             2: '九二：井谷射鲋，瓮敝漏。',
             3: '九三：井渫不食，为我心恻。可用汲，王明，并受其福。',
@@ -957,7 +600,7 @@ const hexagramDatabase = {
             5: '九五：井冽，寒泉食。',
             6: '上六：井收勿幕，有孚元吉。'
         },
-        49: { // 革卦爻辞
+        49: { // 革
             1: '初九：巩用黄牛之革。',
             2: '六二：巳日乃革之，征吉，无咎。',
             3: '九三：征凶，贞厉。革言三就，有孚。',
@@ -965,7 +608,7 @@ const hexagramDatabase = {
             5: '九五：大人虎变，未占有孚。',
             6: '上六：君子豹变，小人革面，征凶，居贞吉。'
         },
-        50: { // 鼎卦爻辞
+        50: { // 鼎
             1: '初六：鼎颠趾，利出否。得妾以其子，无咎。',
             2: '九二：鼎有实，我仇有疾，不我能即，吉。',
             3: '九三：鼎耳革，其行塞，雉膏不食。方雨亏悔，终吉。',
@@ -973,7 +616,7 @@ const hexagramDatabase = {
             5: '六五：鼎黄耳金铉，利贞。',
             6: '上六：鼎玉铉，大吉，无不利。'
         },
-        51: { // 震卦爻辞
+        51: { // 震
             1: '初九：震来虩虩，后笑言哑哑，吉。',
             2: '六二：震来厉，亿丧贝，跻于九陵，勿逐，七日得。',
             3: '六三：震苏苏，震行无眚。',
@@ -981,7 +624,7 @@ const hexagramDatabase = {
             5: '六五：震往来厉，亿无丧，有事。',
             6: '上六：震索索，视矍矍，征凶。震不于其躬，于其邻，无咎。婚媾有言。'
         },
-        52: { // 艮卦爻辞
+        52: { // 艮
             1: '初六：艮其趾，无咎，利永贞。',
             2: '六二：艮其腓，不拯其随，其心不快。',
             3: '九三：艮其限，列其夤，厉薰心。',
@@ -989,7 +632,7 @@ const hexagramDatabase = {
             5: '六五：艮其辅，言有序，悔亡。',
             6: '上九：敦艮，吉。'
         },
-        53: { // 渐卦爻辞
+        53: { // 渐
             1: '初六：鸿渐于干，小子厉，有言，无咎。',
             2: '六二：鸿渐于磐，饮食衎衎，吉。',
             3: '九三：鸿渐于陆，夫征不复，妇孕不育，凶。利御寇。',
@@ -997,7 +640,7 @@ const hexagramDatabase = {
             5: '九五：鸿渐于陵，妇三岁不孕，终莫之胜，吉。',
             6: '上九：鸿渐于陆，其羽可用为仪，吉。'
         },
-        54: { // 归妹卦爻辞
+        54: { // 归妹
             1: '初九：归妹以娣，跛能履，征吉。',
             2: '九二：眇能视，利幽人之贞。',
             3: '六三：归妹以须，反归以娣。',
@@ -1005,8 +648,7 @@ const hexagramDatabase = {
             5: '六五：帝乙归妹，其君之袂，不如其娣之袂良。月几望，吉。',
             6: '上六：女承筐无实，士刲羊无血，无攸利。'
         },
-         // 55. 丰卦爻辞
-        55: {
+        55: { // 丰
             1: '初九：遇其配主，虽旬无咎，往有尚。',
             2: '六二：丰其蔀，日中见斗。往得疑疾，有孚发若，吉。',
             3: '九三：丰其沛，日中见沬。折其右肱，无咎。',
@@ -1014,9 +656,7 @@ const hexagramDatabase = {
             5: '六五：来章，有庆誉，吉。',
             6: '上六：丰其屋，蔀其家，窥其户，阒其无人，三岁不觌，凶。'
         },
-        
-        // 56. 旅卦爻辞
-        56: {
+        56: { // 旅
             1: '初六：旅琐琐，斯其所取灾。',
             2: '六二：旅即次，怀其资，得童仆贞。',
             3: '九三：旅焚其次，丧其童仆，贞厉。',
@@ -1024,9 +664,7 @@ const hexagramDatabase = {
             5: '六五：射雉一矢亡，终以誉命。',
             6: '上九：鸟焚其巢，旅人先笑后号咷。丧牛于易，凶。'
         },
-        
-        // 57. 巽卦爻辞
-        57: {
+        57: { // 巽
             1: '初六：进退，利武人之贞。',
             2: '九二：巽在床下，用史巫纷若，吉，无咎。',
             3: '九三：频巽，吝。',
@@ -1034,9 +672,7 @@ const hexagramDatabase = {
             5: '九五：贞吉，悔亡，无不利。无初有终，先庚三日，后庚三日，吉。',
             6: '上九：巽在床下，丧其资斧，贞凶。'
         },
-        
-        // 58. 兑卦爻辞
-        58: {
+        58: { // 兑
             1: '初九：和兑，吉。',
             2: '九二：孚兑，吉，悔亡。',
             3: '六三：来兑，凶。',
@@ -1044,9 +680,7 @@ const hexagramDatabase = {
             5: '九五：孚于剥，有厉。',
             6: '上六：引兑。'
         },
-        
-        // 59. 涣卦爻辞
-        59: {
+        59: { // 涣
             1: '初六：用拯马壮，吉。',
             2: '九二：涣奔其机，悔亡。',
             3: '六三：涣其躬，无悔。',
@@ -1054,9 +688,7 @@ const hexagramDatabase = {
             5: '九五：涣汗其大号，涣王居，无咎。',
             6: '上九：涣其血，去逖出，无咎。'
         },
-        
-        // 60. 节卦爻辞
-        60: {
+        60: { // 节
             1: '初九：不出户庭，无咎。',
             2: '九二：不出门庭，凶。',
             3: '六三：不节若，则嗟若，无咎。',
@@ -1064,9 +696,7 @@ const hexagramDatabase = {
             5: '九五：甘节，吉，往有尚。',
             6: '上六：苦节，贞凶，悔亡。'
         },
-        
-        // 61. 中孚卦爻辞
-        61: {
+        61: { // 中孚
             1: '初九：虞吉，有它不燕。',
             2: '九二：鸣鹤在阴，其子和之。我有好爵，吾与尔靡之。',
             3: '六三：得敌，或鼓或罢，或泣或歌。',
@@ -1074,9 +704,7 @@ const hexagramDatabase = {
             5: '九五：有孚挛如，无咎。',
             6: '上九：翰音登于天，贞凶。'
         },
-        
-        // 62. 小过卦爻辞
-        62: {
+        62: { // 小过
             1: '初六：飞鸟以凶。',
             2: '六二：过其祖，遇其妣。不及其君，遇其臣，无咎。',
             3: '九三：弗过防之，从或戕之，凶。',
@@ -1084,9 +712,7 @@ const hexagramDatabase = {
             5: '六五：密云不雨，自我西郊。公弋取彼在穴。',
             6: '上六：弗遇过之，飞鸟离之，凶，是谓灾眚。'
         },
-        
-        // 63. 既济卦爻辞
-        63: {
+        63: { // 既济
             1: '初九：曳其轮，濡其尾，无咎。',
             2: '六二：妇丧其茀，勿逐，七日得。',
             3: '九三：高宗伐鬼方，三年克之，小人勿用。',
@@ -1094,9 +720,7 @@ const hexagramDatabase = {
             5: '九五：东邻杀牛，不如西邻之禴祭，实受其福。',
             6: '上六：濡其首，厉。'
         },
-        
-        // 64. 未济卦爻辞
-        64: {
+        64: { // 未济
             1: '初六：濡其尾，吝。',
             2: '九二：曳其轮，贞吉。',
             3: '六三：未济，征凶，利涉大川。',
@@ -1106,145 +730,113 @@ const hexagramDatabase = {
         }
     },
     
-    // 查找卦象（改进版，支持多种查找方式）
-    findHexagram: function(shangBinary, xiaBinary) {
-        // 注意：这里的顺序应该是上卦+下卦
-        const binary = shangBinary + xiaBinary;
+    // ==================== 六神顺序（根据日干）====================
+    liuShenOrderMap: {
+        '甲': ['青龙', '朱雀', '勾陈', '螣蛇', '白虎', '玄武'],
+        '乙': ['青龙', '朱雀', '勾陈', '螣蛇', '白虎', '玄武'],
+        '丙': ['朱雀', '勾陈', '螣蛇', '白虎', '玄武', '青龙'],
+        '丁': ['朱雀', '勾陈', '螣蛇', '白虎', '玄武', '青龙'],
+        '戊': ['勾陈', '螣蛇', '白虎', '玄武', '青龙', '朱雀'],
+        '己': ['勾陈', '螣蛇', '白虎', '玄武', '青龙', '朱雀'],
+        '庚': ['白虎', '玄武', '青龙', '朱雀', '勾陈', '螣蛇'],
+        '辛': ['白虎', '玄武', '青龙', '朱雀', '勾陈', '螣蛇'],
+        '壬': ['玄武', '青龙', '朱雀', '勾陈', '螣蛇', '白虎'],
+        '癸': ['玄武', '青龙', '朱雀', '勾陈', '螣蛇', '白虎']
+    },
+    
+    // ==================== 核心查找方法 ====================
+    /**
+     * 通过6位二进制字符串查找卦象
+     * @param {string} binary6 - 6位二进制，从初爻到上爻
+     * @returns {object} 卦象数据
+     */
+    findHexagramByBinary: function(binary6) {
+        console.log('【查找卦象】二进制:', binary6);
         
-        // 直接查找
-        if (this.guaGongData[binary]) {
-            return this.guaGongData[binary];
+        if (this.guaGongData[binary6]) {
+            return this.guaGongData[binary6];
         }
         
-        // 如果直接查找不到，可能是顺序问题，尝试所有组合
-        console.warn(`未找到卦象: 上卦${shangBinary}(${this.getGuaName(shangBinary)}), 下卦${xiaBinary}(${this.getGuaName(xiaBinary)})`);
+        // 尝试修正可能的顺序错误（兼容旧版）
+        const reversed = binary6.split('').reverse().join('');
+        if (this.guaGongData[reversed]) {
+            console.warn('使用反转二进制找到卦象:', reversed);
+            return this.guaGongData[reversed];
+        }
         
-        // 提供一个默认的卦象数据
+        // 创建回退卦象
+        return this.createFallbackHexagram(binary6);
+    },
+    
+    /**
+     * 通过上下卦二进制查找卦象
+     * @param {string} shangBinary - 上卦3位二进制
+     * @param {string} xiaBinary - 下卦3位二进制
+     * @returns {object} 卦象数据
+     */
+    findHexagram: function(shangBinary, xiaBinary) {
+        const binary6 = xiaBinary + shangBinary; // 下卦在前，上卦在后
+        return this.findHexagramByBinary(binary6);
+    },
+    
+    /**
+     * 创建回退卦象
+     */
+    createFallbackHexagram: function(binary6) {
+        const xiaBinary = binary6.slice(0, 3);
+        const shangBinary = binary6.slice(3, 6);
+        const xiaName = this.getGuaName(xiaBinary);
+        const shangName = this.getGuaName(shangBinary);
+        
         return {
-            name: `${this.getGuaName(shangBinary)}上${this.getGuaName(xiaBinary)}下`,
+            name: `${shangName}上${xiaName}下`,
             number: 0,
-            guaGong: this.getDefaultGuaGong(shangBinary, xiaBinary),
+            guaGong: shangName,
             shiWei: 1,
             yingWei: 4,
-            wuXing: this.getDefaultWuXing(shangBinary, xiaBinary)
+            wuXing: this.naJiaMap[shangName]?.wuXing || '金',
+            isFallback: true
         };
     },
     
-    // 获取默认卦宫
-    getDefaultGuaGong: function(shangBinary, xiaBinary) {
-        const shangGua = this.getGuaName(shangBinary);
-        const xiaGua = this.getGuaName(xiaBinary);
-        
-        // 上下卦相同，属于本宫
-        if (shangGua === xiaGua) {
-            return shangGua;
-        }
-        
-        // 根据上下卦的五行关系判断
-        const shangWuXing = this.getGuaWuXing(shangBinary);
-        const xiaWuXing = this.getGuaWuXing(xiaBinary);
-        
-        // 如果下卦五行生上卦五行，可能属于上卦宫
-        if (this.isSheng(xiaWuXing, shangWuXing)) {
-            return shangGua;
-        }
-        
-        // 默认返回上卦
-        return shangGua;
+    /**
+     * 获取卦名（3位二进制）
+     */
+    getGuaName: function(binary3) {
+        return this.bagua[binary3]?.name || '未知';
     },
     
-    // 获取默认五行
-    getDefaultWuXing: function(shangBinary, xiaBinary) {
-        const guaGong = this.getDefaultGuaGong(shangBinary, xiaBinary);
-        return this.naJiaMap[guaGong]?.wuXing || '金';
+    /**
+     * 获取八卦信息（3位二进制）
+     */
+    getBagua: function(binary3) {
+        return this.bagua[binary3] || { name: '未知', wuXing: '金' };
     },
     
-    // 判断五行相生
-    isSheng: function(wuXing1, wuXing2) {
-        const shengMap = {
-            '金': '水',
-            '水': '木', 
-            '木': '火',
-            '火': '土',
-            '土': '金'
-        };
-        return shengMap[wuXing1] === wuXing2;
-    },
-    
-    // 判断五行相克
-    isKe: function(wuXing1, wuXing2) {
-        const keMap = {
-            '金': '木',
-            '木': '土',
-            '土': '水',
-            '水': '火',
-            '火': '金'
-        };
-        return keMap[wuXing1] === wuXing2;
-    },
-    
-    // 获取卦名
-    getGuaName: function(binary) {
-        return this.bagua[binary]?.name || '未知';
-    },
-    
-    // 获取卦的五行
-    getGuaWuXing: function(binary) {
-        return this.bagua[binary]?.wuXing || '未知';
-    },
-    
-    // 获取纳甲地支
-    getNaJiaDiZhi: function(guaName, isNeiGua, yaoPosition) {
-        const guaData = this.naJiaMap[guaName];
-        if (!guaData) {
-            console.error(`未找到卦 ${guaName} 的纳甲数据`);
-            return '未知';
-        }
-        
-        const dizhiList = isNeiGua ? guaData.neiGua : guaData.waiGua;
-        
-        // 确保位置在范围内
-        if (yaoPosition >= 0 && yaoPosition < dizhiList.length) {
-            return dizhiList[yaoPosition];
-        }
-        
-        console.error(`爻位置超出范围: ${yaoPosition}, 卦: ${guaName}, 内外卦: ${isNeiGua ? '内卦' : '外卦'}`);
-        return '未知';
-    },
-    
-    // 获取卦辞
+    /**
+     * 获取卦辞
+     */
     getHexagramText: function(number) {
-        if (this.hexagramTexts[number]) {
-            return this.hexagramTexts[number];
-        }
-        
-        // 如果找不到指定编号的卦辞，返回默认
-        console.warn(`未找到编号为 ${number} 的卦辞`);
-        return {
-            name: '未知卦',
-            text: '无卦辞',
-            explanation: '无解释',
-            judgment: '未知'
-        };
+        return this.hexagramTexts[number] || { text: '', explanation: '', judgment: '' };
     },
     
-    // 获取爻辞
-    getYaoText: function(guaNumber, yaoNumber) {
-        if (!this.yaoTexts[guaNumber]) {
-            console.warn(`未找到编号为 ${guaNumber} 的爻辞`);
-            return '无爻辞';
+    /**
+     * 获取爻辞
+     * @param {number} guaNumber - 卦数
+     * @param {number} yaoPosition - 爻位 (1-6)
+     */
+    getYaoText: function(guaNumber, yaoPosition) {
+        const guaYao = this.yaoTexts[guaNumber];
+        if (guaYao && guaYao[yaoPosition]) {
+            return guaYao[yaoPosition];
         }
-        
-        const yaoText = this.yaoTexts[guaNumber][yaoNumber];
-        if (!yaoText) {
-            console.warn(`卦 ${guaNumber} 无第 ${yaoNumber} 爻的爻辞`);
-            return '无爻辞';
-        }
-        
-        return yaoText;
+        const positionNames = ['初', '二', '三', '四', '五', '上'];
+        return `${positionNames[yaoPosition-1]}爻：爻辞未收录`;
     },
     
-    // 根据爻的二进制值获取爻的性质
+    /**
+     * 获取爻的性质（根据爻值）
+     */
     getYaoNature: function(yaoValue) {
         switch(yaoValue) {
             case 6: return { name: '老阴', isYang: false, isChanging: true };
@@ -1255,8 +847,30 @@ const hexagramDatabase = {
         }
     },
     
-    // 获取六亲关系
+    /**
+     * 获取纳甲地支
+     * @param {string} guaGong - 卦宫名（如'乾'）
+     * @param {boolean} isNeiGua - 是否内卦（下卦）
+     * @param {number} yaoIndex - 爻索引（0-2，0=初爻/四爻）
+     */
+    getNaJiaDiZhi: function(guaGong, isNeiGua, yaoIndex) {
+        const guaData = this.naJiaMap[guaGong];
+        if (!guaData) return '甲子';
+        
+        const dizhiList = isNeiGua ? guaData.neiGua : guaData.waiGua;
+        if (yaoIndex >= 0 && yaoIndex < dizhiList.length) {
+            return dizhiList[yaoIndex];
+        }
+        return '甲子';
+    },
+    
+    /**
+     * 获取六亲关系
+     * @param {string} guaWuXing - 卦的五行
+     * @param {string} yaoWuXing - 爻的五行
+     */
     getLiuQinRelation: function(guaWuXing, yaoWuXing) {
+        if (!guaWuXing || !yaoWuXing) return '未知';
         if (guaWuXing === yaoWuXing) return '兄弟';
         
         const shengKeMap = {
@@ -1278,92 +892,48 @@ const hexagramDatabase = {
         return '未知';
     },
     
-    // 获取六神顺序
+    /**
+     * 获取六神顺序数组
+     * @param {string} tianGan - 天干（甲~癸）
+     * @returns {string[]} 六神顺序数组
+     */
     getLiuShenOrder: function(tianGan) {
-        const liuShenMap = {
-            '甲': ['青龙', '朱雀', '勾陈', '螣蛇', '白虎', '玄武'],
-            '乙': ['青龙', '朱雀', '勾陈', '螣蛇', '白虎', '玄武'],
-            '丙': ['朱雀', '勾陈', '螣蛇', '白虎', '玄武', '青龙'],
-            '丁': ['朱雀', '勾陈', '螣蛇', '白虎', '玄武', '青龙'],
-            '戊': ['勾陈', '螣蛇', '白虎', '玄武', '青龙', '朱雀'],
-            '己': ['勾陈', '螣蛇', '白虎', '玄武', '青龙', '朱雀'],
-            '庚': ['白虎', '玄武', '青龙', '朱雀', '勾陈', '螣蛇'],
-            '辛': ['白虎', '玄武', '青龙', '朱雀', '勾陈', '螣蛇'],
-            '壬': ['玄武', '青龙', '朱雀', '勾陈', '螣蛇', '白虎'],
-            '癸': ['玄武', '青龙', '朱雀', '勾陈', '螣蛇', '白虎']
-        };
-        
-        return liuShenMap[tianGan] || liuShenMap['甲'];
+        return this.liuShenOrderMap[tianGan] || ['青龙', '朱雀', '勾陈', '螣蛇', '白虎', '玄武'];
     },
     
-    // 获取世应口诀
-    getShiYingFormula: function(guaData) {
-        const formulas = {
-            1: '八纯卦世在六',
-            2: '一三五世错卦综',
-            3: '游魂四世归魂三',
-            4: '天同二世天变五',
-            5: '地同四世地变初',
-            6: '人同游魂人变归'
-        };
-        
-        // 简化的世应判断
-        if (guaData.shiWei === 6 && guaData.yingWei === 3) {
-            return '八纯卦，世在六爻，应在三爻';
-        } else if (guaData.shiWei === 1 && guaData.yingWei === 4) {
-            return '一世卦，世在初爻，应在四爻';
-        } else if (guaData.shiWei === 2 && guaData.yingWei === 5) {
-            return '二世卦，世在二爻，应在五爻';
-        } else if (guaData.shiWei === 3 && guaData.yingWei === 6) {
-            return '三世卦，世在三爻，应在六爻';
-        } else if (guaData.shiWei === 4 && guaData.yingWei === 1) {
-            return '四世卦，世在四爻，应在初爻';
-        } else if (guaData.shiWei === 5 && guaData.yingWei === 2) {
-            return '五世卦，世在五爻，应在二爻';
-        } else {
-            return '世应在' + guaData.shiWei + '爻和' + guaData.yingWei + '爻';
-        }
+    /**
+     * 获取指定爻位的六神
+     * @param {string} tianGan - 日干
+     * @param {number} yaoIndex - 爻索引（0-5，0=初爻）
+     * @returns {string} 六神名称
+     */
+    getLiuShenForYao: function(tianGan, yaoIndex) {
+        const order = this.getLiuShenOrder(tianGan);
+        return order[yaoIndex % 6];
     },
     
-    // 获取用神建议
-    getYongShenAdvice: function(questionType) {
+    /**
+     * 获取用神建议
+     */
+    getYongShenAdvice: function(questionType, gender = 'male') {
         const adviceMap = {
-            'wealth': { 
-                yongShen: '妻财',
-                description: '问财运以妻财爻为用神，看其旺衰及生克关系。',
-                tips: '妻财爻旺相得生，财运亨通；休囚受克，财运不济。'
-            },
-            'career': { 
-                yongShen: '官鬼',
-                description: '问事业以官鬼爻为用神，代表职位、权力、约束。',
-                tips: '官鬼爻旺相，事业顺利；休囚受克，多有阻碍。'
-            },
+            'wealth': { yongShen: '妻财', description: '问财运以妻财爻为用神', tips: '妻财爻旺相得生，财运亨通' },
+            'career': { yongShen: '官鬼', description: '问事业以官鬼爻为用神', tips: '官鬼爻旺相，事业顺利' },
             'relationship': { 
-                yongShen: { male: '妻财', female: '官鬼' },
-                description: '问感情婚姻，男性以妻财爻为用神，女性以官鬼爻为用神。',
-                tips: '用神旺相得生，感情顺利；休囚受克，多有波折。'
+                yongShen: gender === 'male' ? '妻财' : '官鬼',
+                description: '问感情婚姻，男性以妻财爻为用神，女性以官鬼爻为用神',
+                tips: '用神旺相得生，感情顺利'
             },
-            'health': { 
-                yongShen: '官鬼',
-                description: '问健康疾病以官鬼爻为用神，但需结合子孙爻（医药）分析。',
-                tips: '官鬼爻旺相，病情较重；子孙爻旺相，医药有效。'
-            },
-            'exam': { 
-                yongShen: '父母',
-                description: '问考试学业以父母爻为用神，代表文书、成绩、录取。',
-                tips: '父母爻旺相，考试顺利；休囚受克，成绩不理想。'
-            },
-            'others': { 
-                yongShen: '应爻',
-                description: '其他事项以应爻为用神，代表所问之事。',
-                tips: '应爻旺相，事易成；休囚受克，事多阻。'
-            }
+            'health': { yongShen: '官鬼', description: '问健康疾病以官鬼爻为用神', tips: '官鬼爻旺相，病情较重；子孙爻旺相，医药有效' },
+            'exam': { yongShen: '父母', description: '问考试学业以父母爻为用神', tips: '父母爻旺相，考试顺利' },
+            'others': { yongShen: '应爻', description: '其他事项以应爻为用神', tips: '应爻旺相，事易成' }
         };
-        
         return adviceMap[questionType] || adviceMap['others'];
     },
     
-    // 初始化验证
+    /**
+     * 初始化检查
+     */
     initializeCheck: function() {
         console.log('六爻数据库初始化检查:');
         console.log('- 八卦数据:', Object.keys(this.bagua).length, '个');
@@ -1372,19 +942,10 @@ const hexagramDatabase = {
         console.log('- 卦辞数据:', Object.keys(this.hexagramTexts).length, '个');
         console.log('- 爻辞数据:', Object.keys(this.yaoTexts).length, '个卦');
         
-        // 检查数据完整性
-        if (Object.keys(this.guaGongData).length < 64) {
-            console.warn('警告：六十四卦数据不完整，需要补充');
+        const expectedHexagrams = 64;
+        if (Object.keys(this.guaGongData).length < expectedHexagrams) {
+            console.warn(`警告：六十四卦数据不完整，当前${Object.keys(this.guaGongData).length}/64`);
         }
-        
-        if (Object.keys(this.hexagramTexts).length < 64) {
-            console.warn('警告：卦辞数据不完整，需要补充');
-        }
-        
-        if (Object.keys(this.yaoTexts).length < 64) {
-            console.warn('警告：爻辞数据不完整，需要补充');
-        }
-        
         return {
             baguaCount: Object.keys(this.bagua).length,
             hexagramCount: Object.keys(this.guaGongData).length,
@@ -1396,11 +957,12 @@ const hexagramDatabase = {
 };
 
 // 执行初始化检查
-hexagramDatabase.initializeCheck();
+if (typeof window !== 'undefined') {
+    hexagramDatabase.initializeCheck();
+    window.hexagramDatabase = hexagramDatabase;
+}
 
-// 导出供其他模块使用
+// 支持模块导出
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = hexagramDatabase;
-} else {
-    window.hexagramDatabase = hexagramDatabase;
 }
