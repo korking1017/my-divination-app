@@ -723,7 +723,7 @@ class LiuYaoApp {
         }
     }
     
-    // 显示解卦结果
+    // ==================== 显示解卦结果（重写，解决用神、动爻、重复等问题） ====================
     displayInterpretation() {
         if (!this.interpretationContent) return;
         
@@ -733,11 +733,12 @@ class LiuYaoApp {
         }
         
         const hexagram = this.currentHexagram.benGua;
+        const jr = this.jieguaResult;
         const changingYaos = this.currentHexagram.changingYaos;
         
         let html = '<div class="interpretation-container">';
         
-        // 卦象基本信息
+        // 1. 卦象基本信息（保留）
         html += `
             <div class="interpretation-item">
                 <h4>📊 ${hexagram.name}</h4>
@@ -748,37 +749,67 @@ class LiuYaoApp {
             </div>
         `;
         
-        // 动爻信息
+        // 2. 用神分析（使用 jieguaResult 中的 yongShen 文本，并补充数据库中的用神建议）
+        if (jr.yongShen) {
+            html += `
+                <div class="interpretation-item">
+                    <h4>🔍 用神分析</h4>
+                    <p>${jr.yongShen.replace(/\n/g, '<br>')}</p>
+                </div>
+            `;
+        }
+        
+        // 获取并显示更详细的用神建议（从数据库）
+        try {
+            const yongShenAdvice = hexagramDatabase.getYongShenAdvice(
+                jr.questionType || this.questionSelect?.value,
+                document.querySelector('input[name="gender"]:checked')?.value || 'male'
+            );
+            if (yongShenAdvice && yongShenAdvice.tips) {
+                html += `
+                    <div class="interpretation-item">
+                        <h4>💡 用神建议</h4>
+                        <p>${yongShenAdvice.tips}</p>
+                    </div>
+                `;
+            }
+        } catch (e) {
+            console.warn('获取用神建议失败', e);
+        }
+        
+        // 3. 动爻分析（使用 jieguaResult 中已经生成的详细文本，包含爻辞和六神）
         if (changingYaos.length > 0) {
-            const yaoNames = changingYaos.map(pos => {
-                const names = ['初', '二', '三', '四', '五', '上'];
-                return `${names[pos - 1]}爻`;
-            });
             html += `
                 <div class="interpretation-item">
                     <h4>🌀 动爻分析</h4>
-                    <p><strong>动爻位置：</strong>${yaoNames.join('、')}</p>
-                    <p><strong>变卦：</strong>${this.currentHexagram.bianGua?.name || '未知'}</p>
-                    <p><strong>提示：</strong>${changingYaos.length === 1 ? '独发之爻是重点' : '多爻发动，事体多变'}</p>
+                    <p>${jr.changingYaos ? jr.changingYaos.replace(/\n/g, '<br>') : '无详细分析'}</p>
                 </div>
             `;
-        }
-        
-        // 解卦内容
-        if (this.jieguaResult.overall) {
+        } else {
             html += `
                 <div class="interpretation-item">
-                    <h4>📈 总体运势</h4>
-                    <p>${this.jieguaResult.overall}</p>
+                    <h4>🌀 动爻分析</h4>
+                    <p>本卦无动爻（静卦），事体平稳，变化不大。</p>
                 </div>
             `;
         }
         
-        if (this.jieguaResult.advice) {
+        // 4. 世应关系（如果存在）
+        if (jr.shiYing) {
+            html += `
+                <div class="interpretation-item">
+                    <h4>⚖️ 世应关系</h4>
+                    <p>${jr.shiYing.replace(/\n/g, '<br>')}</p>
+                </div>
+            `;
+        }
+        
+        // 5. 综合建议（保留）
+        if (jr.advice) {
             html += `
                 <div class="interpretation-item">
                     <h4>💡 综合建议</h4>
-                    <p>${this.jieguaResult.advice}</p>
+                    <p>${jr.advice.replace(/\n/g, '<br>')}</p>
                 </div>
             `;
         }
@@ -787,7 +818,7 @@ class LiuYaoApp {
         this.interpretationContent.innerHTML = html;
     }
     
-    // 显示基础解卦
+    // 显示基础解卦（增强版，也尽量显示用神和动爻详细）
     showBasicInterpretation() {
         if (!this.interpretationContent) return;
         
@@ -799,21 +830,62 @@ class LiuYaoApp {
             return;
         }
         
-        this.interpretationContent.innerHTML = `
+        let html = `
             <div class="interpretation-container">
                 <div class="interpretation-item">
                     <h4>📊 ${hexagram.name}</h4>
                     <p><strong>卦辞：</strong>${hexagram.guaText || '暂无'}</p>
                     <p><strong>解读：</strong>${hexagram.explanation || '暂无'}</p>
                 </div>
+        `;
+        
+        // 尝试获取用神建议（即使没有完整排卦，也可以基于问事类型给提示）
+        const questionType = this.questionSelect?.value;
+        if (questionType) {
+            const gender = document.querySelector('input[name="gender"]:checked')?.value || 'male';
+            try {
+                const yongShenAdvice = hexagramDatabase.getYongShenAdvice(questionType, gender);
+                if (yongShenAdvice) {
+                    html += `
+                        <div class="interpretation-item">
+                            <h4>🔍 用神提示</h4>
+                            <p>${yongShenAdvice.description || ''}<br>${yongShenAdvice.tips || ''}</p>
+                        </div>
+                    `;
+                }
+            } catch(e) {}
+        }
+        
+        if (changingYaos.length > 0) {
+            const yaoNames = changingYaos.map(pos => {
+                const names = ['初', '二', '三', '四', '五', '上'];
+                return `${names[pos-1]}爻`;
+            }).join('、');
+            html += `
                 <div class="interpretation-item">
-                    <h4>💡 解卦提示</h4>
-                    <p>• 本卦为${hexagram.name}，${changingYaos.length > 0 ? `有${changingYaos.length}个动爻` : '为静卦'}</p>
-                    <p>• 请结合排卦表格中的地支、六亲、世应、六神综合分析</p>
-                    <p>• 选择问事类型可获得更详细的解读</p>
+                    <h4>🌀 动爻信息</h4>
+                    <p>本卦有${changingYaos.length}个动爻：${yaoNames}<br>变卦：${this.currentHexagram?.bianGua?.name || '未知'}</p>
                 </div>
+            `;
+        } else {
+            html += `
+                <div class="interpretation-item">
+                    <h4>🌀 动爻信息</h4>
+                    <p>本卦无动爻（静卦），事体平稳。</p>
+                </div>
+            `;
+        }
+        
+        html += `
+            <div class="interpretation-item">
+                <h4>💡 解卦提示</h4>
+                <p>• 请结合排卦表格中的地支、六亲、世应、六神综合分析<br>
+                • 选择问事类型可获得更详细的解读</p>
             </div>
         `;
+        
+        html += '</div>';
+        this.interpretationContent.innerHTML = html;
     }
     
     // 显示解卦消息
